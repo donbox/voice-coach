@@ -15,61 +15,63 @@ struct ExerciseDetailView: View {
     }
 
     var body: some View {
-        List {
-            Section {
-                VideoPlayerView(relativePath: exercise.demoVideoRelativePath)
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .listRowInsets(EdgeInsets())
-            } header: {
-                Text("Instructor Demo")
-            }
+        VStack(spacing: 0) {
+            // Video sits outside the List so AVPlayerViewController
+            // gets proper geometry from SwiftUI's VStack layout.
+            VideoPlayerView(relativePath: exercise.demoVideoRelativePath)
+                .aspectRatio(16/9, contentMode: .fit)
+                .frame(maxWidth: .infinity)
 
-            Section {
-                if sortedAttempts.isEmpty {
-                    ContentUnavailableView(
-                        "No Attempts Yet",
-                        systemImage: "video.badge.plus",
-                        description: Text("Record your first attempt.")
-                    )
-                } else {
-                    ForEach(sortedAttempts) { attempt in
-                        Button {
-                            selectedAttempt = attempt
-                        } label: {
-                            HStack {
-                                Text(attempt.recordedAt.formatted(date: .abbreviated, time: .shortened))
-                                Spacer()
-                                if let duration = attempt.durationSeconds {
-                                    Text(formatDuration(duration))
-                                        .foregroundStyle(.secondary)
+            Divider()
+
+            List {
+                Section {
+                    if sortedAttempts.isEmpty {
+                        ContentUnavailableView(
+                            "No Attempts Yet",
+                            systemImage: "video.badge.plus",
+                            description: Text("Record your first attempt.")
+                        )
+                    } else {
+                        ForEach(sortedAttempts) { attempt in
+                            Button {
+                                selectedAttempt = attempt
+                            } label: {
+                                HStack {
+                                    Text(attempt.recordedAt.formatted(date: .abbreviated, time: .shortened))
+                                    Spacer()
+                                    if let duration = attempt.durationSeconds {
+                                        Text(formatDuration(duration))
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Image(systemName: "play.circle")
+                                        .foregroundStyle(.tint)
                                 }
-                                Image(systemName: "play.circle")
-                                    .foregroundStyle(.tint)
+                                .contentShape(Rectangle())
                             }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                deleteAttempt(attempt)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteAttempt(attempt)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                        }
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                deleteAttempt(attempt)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    deleteAttempt(attempt)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
-                }
-            } header: {
-                HStack {
-                    Text("My Attempts (\(exercise.attempts.count))")
-                    Spacer()
-                    SortOrderPicker(newestFirst: $sortNewestFirst)
+                } header: {
+                    HStack {
+                        Text("My Attempts (\(exercise.attempts.count))")
+                        Spacer()
+                        SortOrderPicker(newestFirst: $sortNewestFirst)
+                    }
                 }
             }
         }
