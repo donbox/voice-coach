@@ -1,5 +1,5 @@
 import SwiftUI
-import UniformTypeIdentifiers
+import PhotosUI
 
 struct ExerciseCreationView: View {
     @Environment(\.modelContext) private var modelContext
@@ -8,8 +8,9 @@ struct ExerciseCreationView: View {
     @State private var title = ""
     @State private var category = ""
     @State private var courseSession = ""
-    @State private var showingFileImporter = false
+    @State private var pickerItem: PhotosPickerItem?
     @State private var selectedVideoURL: URL?
+    @State private var isLoading = false
     @State private var importError: String?
 
     private var canSave: Bool {
@@ -26,17 +27,25 @@ struct ExerciseCreationView: View {
                 }
 
                 Section("Instructor Video") {
-                    if let url = selectedVideoURL {
+                    if isLoading {
+                        HStack {
+                            ProgressView()
+                            Text("Loading video…")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if let url = selectedVideoURL {
                         Label(url.lastPathComponent, systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                     }
 
-                    Button {
-                        showingFileImporter = true
-                    } label: {
+                    PhotosPicker(
+                        selection: $pickerItem,
+                        matching: .videos,
+                        photoLibrary: .shared()
+                    ) {
                         Label(
                             selectedVideoURL == nil ? "Choose Video" : "Change Video",
-                            systemImage: "doc.badge.plus"
+                            systemImage: "photo.on.rectangle"
                         )
                     }
                 }
@@ -56,26 +65,33 @@ struct ExerciseCreationView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { saveExercise() }
-                        .disabled(!canSave)
+                        .disabled(!canSave || isLoading)
                 }
             }
-            .fileImporter(
-                isPresented: $showingFileImporter,
-                allowedContentTypes: [.movie, .video, .mpeg4Movie, .quickTimeMovie],
-                allowsMultipleSelection: false
-            ) { result in
-                handleFileImport(result)
+            .onChange(of: pickerItem) { _, newItem in
+                guard let newItem else { return }
+                loadVideo(from: newItem)
             }
         }
     }
 
-    private func handleFileImport(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            selectedVideoURL = urls.first
-            importError = nil
-        case .failure(let error):
-            importError = error.localizedDescription
+    private func loadVideo(from item: PhotosPickerItem) {
+        isLoading = true
+        importError = nil
+        selectedVideoURL = nil
+
+        Task {
+            do {
+                guard let transferred = try await item.loadTransferable(type: VideoTransferable.self) else {
+                    importError = "Could not load the selected video."
+                    isLoading = false
+                    return
+                }
+                selectedVideoURL = transferred.url
+            } catch {
+                importError = "Failed to load video: \(error.localizedDescription)"
+            }
+            isLoading = false
         }
     }
 
