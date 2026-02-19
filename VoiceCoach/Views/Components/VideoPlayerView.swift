@@ -1,5 +1,6 @@
 import AVKit
 import SwiftUI
+import UIKit
 
 struct VideoPlayerView: View {
     let relativePath: String
@@ -8,7 +9,7 @@ struct VideoPlayerView: View {
     var body: some View {
         Group {
             if let player {
-                VideoPlayer(player: player)
+                PlayerViewControllerRepresentable(player: player)
             } else {
                 Rectangle()
                     .fill(.black)
@@ -20,16 +21,28 @@ struct VideoPlayerView: View {
         }
         .task(id: relativePath) {
             let url = VideoStorageService.shared.resolveURL(for: relativePath)
-            let item = AVPlayerItem(url: url)
-            // Hop off the main actor so AVPlayer initialization doesn't block UI
-            let newPlayer = await Task.detached(priority: .userInitiated) {
-                AVPlayer(playerItem: item)
-            }.value
-            player = newPlayer
+            player = AVPlayer(url: url)
         }
         .onDisappear {
             player?.pause()
             player = nil
         }
+    }
+}
+
+/// AVPlayerViewController wrapped for SwiftUI — renders correctly on Mac Catalyst
+/// and all iOS/iPadOS layouts including inside List rows.
+private struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
+    let player: AVPlayer
+
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let vc = AVPlayerViewController()
+        vc.player = player
+        vc.showsPlaybackControls = true
+        return vc
+    }
+
+    func updateUIViewController(_ vc: AVPlayerViewController, context: Context) {
+        vc.player = player
     }
 }

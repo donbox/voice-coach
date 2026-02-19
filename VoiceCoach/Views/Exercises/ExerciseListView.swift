@@ -52,7 +52,7 @@ struct ExerciseListView: View {
             }
         }
         .sheet(isPresented: $showingCreation) {
-            ExerciseCreationView()
+            ExerciseCreationView(suggestedTitle: "Exercise \(exercises.count + 1)")
         }
     }
 

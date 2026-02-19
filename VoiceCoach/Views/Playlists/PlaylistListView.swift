@@ -40,6 +40,7 @@ struct PlaylistListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    newPlaylistName = "Playlist \(playlists.count + 1)"
                     showingNewPlaylist = true
                 } label: {
                     Image(systemName: "plus")

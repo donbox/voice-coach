@@ -2,8 +2,11 @@ import SwiftUI
 import PhotosUI
 
 struct ExerciseCreationView: View {
+    let suggestedTitle: String
+
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var titleFocused: Bool
 
     @State private var title = ""
     @State private var category = ""
@@ -22,6 +25,7 @@ struct ExerciseCreationView: View {
             Form {
                 Section("Details") {
                     TextField("Title", text: $title)
+                        .focused($titleFocused)
                     TextField("Category (optional)", text: $category)
                     TextField("Course Session (optional)", text: $courseSession)
                 }
@@ -67,6 +71,10 @@ struct ExerciseCreationView: View {
                     Button("Save") { saveExercise() }
                         .disabled(!canSave || isLoading)
                 }
+            }
+            .onAppear {
+                title = suggestedTitle
+                titleFocused = true
             }
             .onChange(of: pickerItem) { _, newItem in
                 guard let newItem else { return }
@@ -115,6 +123,6 @@ struct ExerciseCreationView: View {
 }
 
 #Preview {
-    ExerciseCreationView()
+    ExerciseCreationView(suggestedTitle: "Exercise 4")
         .modelContainer(PreviewSampleData.container)
 }
