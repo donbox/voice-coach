@@ -32,3 +32,18 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         PRODUCT_BUNDLE_IDENTIFIER: com.voicecoach.app
         TARGETED_DEVICE_FAMILY: "1,2"
+
+  VoiceCoachTests:
+    type: bundle.unit-test
+    platform: iOS
+    supportedDestinations:
+      - iOS
+      - macCatalyst
+    sources:
+      - VoiceCoachTests
+    dependencies:
+      - target: VoiceCoach
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.voicecoach.tests

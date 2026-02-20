@@ -16,11 +16,13 @@
 		58D8863F4E40A9B4FC0FF365 /* ExerciseRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CFE0CEC2B393D54E9FC3A3F /* ExerciseRowView.swift */; };
 		5A04E8BB7A8E26EE0A538F6F /* Attempt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36CD79E4B1E4C5AA235A4447 /* Attempt.swift */; };
 		5B03298CE4C999E750BEFCED /* ExerciseCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E848C8DC86CBD82220EB97E8 /* ExerciseCreationView.swift */; };
+		6FF94C03C8AF46D71E0E32B9 /* VideoStorageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B69C8BDA4E0D0CA96338289 /* VideoStorageServiceTests.swift */; };
 		8878115BFF8374775010E226 /* AttemptRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ABF31977CAD4ED0112ADC2 /* AttemptRowView.swift */; };
 		9569355A3F305F1C7E12B4C6 /* VideoStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DECA07E37148315B8F5B4E /* VideoStorageService.swift */; };
 		97F0DD164EBBD0DA8439B000 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45815BC5B096A124A5C5019 /* ExerciseDetailView.swift */; };
 		A49AB7E79BE2189D00E98C15 /* ExerciseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3928F4DAB7947CECE657E4 /* ExerciseListView.swift */; };
 		A9A2753439895370FCE2B7BD /* PreviewSampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6207606BB245D994F223F9D2 /* PreviewSampleData.swift */; };
+		B0F70661755AFD244EB22443 /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B16CDAAFC4608ED95073AB9 /* ModelTests.swift */; };
 		B311AADDCAF4ACAE8F7AB72E /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9C11E13FC61979114ACF88 /* VideoPlayerView.swift */; };
 		B3F81F12F90AD164443D8C1F /* RecordingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAF0EF383FA96647DD837A5 /* RecordingService.swift */; };
 		C6DCBE7F718F6BF808E84436 /* PlaylistListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF27A01A1CB07760AA4A5E7 /* PlaylistListView.swift */; };
@@ -31,7 +33,18 @@
 		F890154B6379E22CC4DDFE81 /* VideoTransferable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2349F32EAE67429F9C136C85 /* VideoTransferable.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		407DA71ED1F2AAC5AC3B664B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E4D8D3B7AB54D084BD88799B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C29F763F0315D30A8FFB7777;
+			remoteInfo = VoiceCoach;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		1B69C8BDA4E0D0CA96338289 /* VideoStorageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoStorageServiceTests.swift; sourceTree = "<group>"; };
 		2349F32EAE67429F9C136C85 /* VideoTransferable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTransferable.swift; sourceTree = "<group>"; };
 		2D338B6A72B035D446F50E62 /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
 		2EBA259BEBB8904577C24616 /* VoiceCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCoachApp.swift; sourceTree = "<group>"; };
@@ -39,7 +52,9 @@
 		3AAA956759F5DD494D3D4A70 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
 		4A9C11E13FC61979114ACF88 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		6207606BB245D994F223F9D2 /* PreviewSampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewSampleData.swift; sourceTree = "<group>"; };
+		6B16CDAAFC4608ED95073AB9 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		6CFE0CEC2B393D54E9FC3A3F /* ExerciseRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseRowView.swift; sourceTree = "<group>"; };
+		730465BD795CE6EAFCE47ACD /* VoiceCoachTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VoiceCoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		78D95F734665E7D448A8F43E /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		7CF27A01A1CB07760AA4A5E7 /* PlaylistListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistListView.swift; sourceTree = "<group>"; };
 		97DEF1E542373479B9BC5D18 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -140,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				5790CB8219F7F94868BE8A2F /* VoiceCoach */,
+				D10D55F475A8DAA37761905B /* VoiceCoachTests */,
 				D955BDE93ECBB6B5234FE6B9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -157,10 +173,20 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		D10D55F475A8DAA37761905B /* VoiceCoachTests */ = {
+			isa = PBXGroup;
+			children = (
+				6B16CDAAFC4608ED95073AB9 /* ModelTests.swift */,
+				1B69C8BDA4E0D0CA96338289 /* VideoStorageServiceTests.swift */,
+			);
+			path = VoiceCoachTests;
+			sourceTree = "<group>";
+		};
 		D955BDE93ECBB6B5234FE6B9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				FBA430A568031616835D445D /* VoiceCoach.app */,
+				730465BD795CE6EAFCE47ACD /* VoiceCoachTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -194,6 +220,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6B9ED42F335783E7A60546D9 /* VoiceCoachTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6EF2DC84F7809C4100085E7 /* Build configuration list for PBXNativeTarget "VoiceCoachTests" */;
+			buildPhases = (
+				CA32D3CE661547800E3BE79D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C9A226404AD0656416FC0D1C /* PBXTargetDependency */,
+			);
+			name = VoiceCoachTests;
+			packageProductDependencies = (
+			);
+			productName = VoiceCoachTests;
+			productReference = 730465BD795CE6EAFCE47ACD /* VoiceCoachTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		C29F763F0315D30A8FFB7777 /* VoiceCoach */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EBE6FE9C862ABEDD82C0658B /* Build configuration list for PBXNativeTarget "VoiceCoach" */;
@@ -236,6 +280,7 @@
 			projectRoot = "";
 			targets = (
 				C29F763F0315D30A8FFB7777 /* VoiceCoach */,
+				6B9ED42F335783E7A60546D9 /* VoiceCoachTests */,
 			);
 		};
 /* End PBXProject section */
@@ -280,9 +325,47 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA32D3CE661547800E3BE79D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0F70661755AFD244EB22443 /* ModelTests.swift in Sources */,
+				6FF94C03C8AF46D71E0E32B9 /* VideoStorageServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C9A226404AD0656416FC0D1C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C29F763F0315D30A8FFB7777 /* VoiceCoach */;
+			targetProxy = 407DA71ED1F2AAC5AC3B664B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		1E7E04EDB8EC10F24A2CD895 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.voicecoach.tests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceCoach.app/VoiceCoach";
+			};
+			name = Release;
+		};
 		3675B4A7DA05862B8D327C6E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -334,6 +417,27 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9C222EF0F80AB644473B9E24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.voicecoach.tests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceCoach.app/VoiceCoach";
 			};
 			name = Debug;
 		};
@@ -468,6 +572,15 @@
 			buildConfigurations = (
 				DDEDE5281F4A44631C69AD25 /* Debug */,
 				B8EC495D67D7490B74B58803 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A6EF2DC84F7809C4100085E7 /* Build configuration list for PBXNativeTarget "VoiceCoachTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C222EF0F80AB644473B9E24 /* Debug */,
+				1E7E04EDB8EC10F24A2CD895 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

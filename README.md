@@ -51,6 +51,27 @@ To run the Mac version from Xcode, select **My Mac (Designed for iPad)** or **My
 
 > **Note:** On first open, go to the **Signing & Capabilities** tab and set your development team.
 
+## Testing
+
+Run the full test suite against the iPad simulator:
+
+```bash
+xcodebuild test \
+  -project VoiceCoach.xcodeproj \
+  -scheme VoiceCoach \
+  -destination "platform=iOS Simulator,name=iPad Pro 13-inch (M4)" \
+  -only-testing:VoiceCoachTests \
+  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO \
+  > /tmp/vc-test.log 2>&1 && grep -E "(✔|✘|passed|failed)" /tmp/vc-test.log
+```
+
+Or from Xcode, press **Cmd+U** with the `VoiceCoach` scheme selected.
+
+The test suite contains two files:
+
+- **`VoiceCoachTests/VideoStorageServiceTests.swift`** — unit tests for file I/O: path resolution, unique URL generation, import, and delete
+- **`VoiceCoachTests/ModelTests.swift`** — SwiftData integration tests using an in-memory container: Exercise CRUD, cascade deletes, Playlist relationships
+
 ## Project Structure
 
 ```
