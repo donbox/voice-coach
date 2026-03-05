@@ -97,7 +97,7 @@ VoiceCoach/
 
 ## Architecture Notes
 
-- Persistence uses SwiftData with direct `@Query` usage in SwiftUI views
+- Persistence uses SwiftData with direct `@Query` usage in SwiftUI views; all data is stored locally on-device with no cloud sync
 - Video files are stored under `Documents/VoiceCoachMedia` using relative paths in models
 - Recording is powered by AVFoundation (`AVCaptureSession` + `AVCaptureMovieFileOutput`)
 - App and exercise actions are exposed through focused scene values for menu/shortcut integration

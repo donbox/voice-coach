@@ -8,7 +8,7 @@ BUNDLE_ID="com.voicecoach.app"
 LOG="/tmp/vc-build.log"
 
 usage() {
-  echo "Usage: ./build.sh [sim|mac|run]"
+  echo "Usage: ./build.sh [sim|mac]"
   echo "  (no args)  build for simulator (compile check)"
   echo "  sim        build + install + launch in iPad simulator"
   echo "  mac        build + launch Mac Catalyst app"
