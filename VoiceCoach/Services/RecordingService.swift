@@ -118,17 +118,22 @@ final class RecordingService: NSObject {
         error = nil
         isRecording = true
         startWatchdogTask?.cancel()
+        let output = movieOutput
         startWatchdogTask = Task { @MainActor in
             // Allow slower capture graph startup before surfacing failure.
             try? await Task.sleep(for: .seconds(4))
             if Task.isCancelled { return }
-            if isRecording && !movieOutput.isRecording {
+            // Bail if a new recording has started or this one was cancelled.
+            guard self.outputURL == url else { return }
+            let recording = await withCheckedContinuation { continuation in
+                sessionQueue.async { continuation.resume(returning: output.isRecording) }
+            }
+            if isRecording && !recording {
                 isRecording = false
                 error = RecordingError.recordingFailedToStart
             }
         }
 
-        let output = movieOutput
         sessionQueue.async {
             output.startRecording(to: url, recordingDelegate: self)
         }
@@ -146,13 +151,17 @@ final class RecordingService: NSObject {
     func cancelRecording() {
         startWatchdogTask?.cancel()
         startWatchdogTask = nil
+        // Clear outputURL to invalidate this recording's identity — any delegate
+        // callbacks that arrive after this point will see a URL mismatch and be ignored,
+        // even if a new recording has already started.
+        outputURL = nil
         onRecordingFinished = nil
         isRecording = false
         let output = movieOutput
+        // Unconditionally stop — covers the race where startRecording was
+        // queued on sessionQueue but hasn't executed yet.
         sessionQueue.async {
-            if output.isRecording {
-                output.stopRecording()
-            }
+            output.stopRecording()
         }
     }
 }
@@ -166,6 +175,12 @@ extension RecordingService: AVCaptureFileOutputRecordingDelegate {
         Task { @MainActor in
             startWatchdogTask?.cancel()
             startWatchdogTask = nil
+            // If this recording was cancelled or superseded while startup was in-flight,
+            // its URL will no longer match — stop it immediately.
+            if fileURL != outputURL {
+                let output = movieOutput
+                sessionQueue.async { output.stopRecording() }
+            }
         }
     }
 
@@ -179,10 +194,14 @@ extension RecordingService: AVCaptureFileOutputRecordingDelegate {
             startWatchdogTask?.cancel()
             startWatchdogTask = nil
             self.isRecording = false
+            // If this recording was cancelled or superseded, its URL will no longer
+            // match outputURL — discard the callback entirely.
+            guard outputFileURL == self.outputURL else { return }
             if let error {
                 self.error = error
             } else {
                 self.onRecordingFinished?(outputFileURL)
+                self.onRecordingFinished = nil
             }
         }
     }
