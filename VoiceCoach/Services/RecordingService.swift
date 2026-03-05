@@ -13,6 +13,7 @@ final class RecordingService: NSObject {
     private let movieOutput = AVCaptureMovieFileOutput()
     private var outputURL: URL?
     private var onRecordingFinished: ((URL) -> Void)?
+    private var startWatchdogTask: Task<Void, Never>?
 
     private let sessionQueue = DispatchQueue(label: "com.voicecoach.capture-session")
 
@@ -114,26 +115,28 @@ final class RecordingService: NSObject {
     func startRecording(to url: URL, onFinished: @escaping (URL) -> Void) {
         outputURL = url
         onRecordingFinished = onFinished
+        error = nil
         isRecording = true
+        startWatchdogTask?.cancel()
+        startWatchdogTask = Task { @MainActor in
+            // Allow slower capture graph startup before surfacing failure.
+            try? await Task.sleep(for: .seconds(4))
+            if Task.isCancelled { return }
+            if isRecording && !movieOutput.isRecording {
+                isRecording = false
+                error = RecordingError.recordingFailedToStart
+            }
+        }
+
         let output = movieOutput
         sessionQueue.async {
             output.startRecording(to: url, recordingDelegate: self)
         }
-        // If recording fails to start, the delegate is never called and
-        // isRecording stays true forever. Fall back after a short delay.
-        sessionQueue.asyncAfter(deadline: .now() + 1) {
-            if !output.isRecording {
-                Task { @MainActor in
-                    if self.isRecording {
-                        self.isRecording = false
-                        self.error = RecordingError.recordingFailedToStart
-                    }
-                }
-            }
-        }
     }
 
     func stopRecording() {
+        startWatchdogTask?.cancel()
+        startWatchdogTask = nil
         let output = movieOutput
         sessionQueue.async {
             output.stopRecording()
@@ -141,6 +144,8 @@ final class RecordingService: NSObject {
     }
 
     func cancelRecording() {
+        startWatchdogTask?.cancel()
+        startWatchdogTask = nil
         onRecordingFinished = nil
         isRecording = false
         let output = movieOutput
@@ -158,7 +163,10 @@ extension RecordingService: AVCaptureFileOutputRecordingDelegate {
         didStartRecordingTo fileURL: URL,
         from connections: [AVCaptureConnection]
     ) {
-        // Recording confirmed started — isRecording was already set optimistically.
+        Task { @MainActor in
+            startWatchdogTask?.cancel()
+            startWatchdogTask = nil
+        }
     }
 
     nonisolated func fileOutput(
@@ -168,6 +176,8 @@ extension RecordingService: AVCaptureFileOutputRecordingDelegate {
         error: Error?
     ) {
         Task { @MainActor in
+            startWatchdogTask?.cancel()
+            startWatchdogTask = nil
             self.isRecording = false
             if let error {
                 self.error = error
