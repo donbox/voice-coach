@@ -9,7 +9,7 @@ final class RecordingService: NSObject {
 
     // nonisolated(unsafe) so that deinit (which is non-isolated) can stop the session.
     // All off-main-actor access is serialized through sessionQueue.
-    nonisolated private(set) var captureSession = AVCaptureSession()
+    nonisolated(unsafe) private(set) var captureSession = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
     private var outputURL: URL?
     private var onRecordingFinished: ((URL) -> Void)?
@@ -69,8 +69,9 @@ final class RecordingService: NSObject {
 
         captureSession.sessionPreset = .high
 
-        // Front camera for self-recording
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+        // Prefer front camera for self-recording; fall back to any camera (Mac Catalyst).
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+                ?? AVCaptureDevice.default(for: .video) else {
             throw RecordingError.cameraUnavailable
         }
         let videoInput = try AVCaptureDeviceInput(device: camera)
@@ -113,16 +114,53 @@ final class RecordingService: NSObject {
     func startRecording(to url: URL, onFinished: @escaping (URL) -> Void) {
         outputURL = url
         onRecordingFinished = onFinished
-        movieOutput.startRecording(to: url, recordingDelegate: self)
         isRecording = true
+        let output = movieOutput
+        sessionQueue.async {
+            output.startRecording(to: url, recordingDelegate: self)
+        }
+        // If recording fails to start, the delegate is never called and
+        // isRecording stays true forever. Fall back after a short delay.
+        sessionQueue.asyncAfter(deadline: .now() + 1) {
+            if !output.isRecording {
+                Task { @MainActor in
+                    if self.isRecording {
+                        self.isRecording = false
+                        self.error = RecordingError.recordingFailedToStart
+                    }
+                }
+            }
+        }
     }
 
     func stopRecording() {
-        movieOutput.stopRecording()
+        let output = movieOutput
+        sessionQueue.async {
+            output.stopRecording()
+        }
+    }
+
+    func cancelRecording() {
+        onRecordingFinished = nil
+        isRecording = false
+        let output = movieOutput
+        sessionQueue.async {
+            if output.isRecording {
+                output.stopRecording()
+            }
+        }
     }
 }
 
 extension RecordingService: AVCaptureFileOutputRecordingDelegate {
+    nonisolated func fileOutput(
+        _ output: AVCaptureFileOutput,
+        didStartRecordingTo fileURL: URL,
+        from connections: [AVCaptureConnection]
+    ) {
+        // Recording confirmed started — isRecording was already set optimistically.
+    }
+
     nonisolated func fileOutput(
         _ output: AVCaptureFileOutput,
         didFinishRecordingTo outputFileURL: URL,
@@ -145,6 +183,7 @@ enum RecordingError: LocalizedError {
     case cameraUnavailable
     case microphoneUnavailable
     case sessionConfigurationFailed
+    case recordingFailedToStart
 
     var errorDescription: String? {
         switch self {
@@ -152,6 +191,7 @@ enum RecordingError: LocalizedError {
         case .cameraUnavailable: "No camera is available."
         case .microphoneUnavailable: "No microphone is available."
         case .sessionConfigurationFailed: "Failed to configure the recording session."
+        case .recordingFailedToStart: "Recording failed to start. The camera may not be available."
         }
     }
 }

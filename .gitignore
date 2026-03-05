@@ -15,6 +15,7 @@ DerivedData/
 
 # Build
 build/
+*.profraw
 
 # Claude local settings
 .claude/settings.local.json

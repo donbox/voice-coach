@@ -18,6 +18,7 @@ struct RecordingView: View {
                 // Top bar
                 HStack {
                     Button {
+                        recorder.cancelRecording()
                         recorder.stopSession()
                         dismiss()
                     } label: {
@@ -64,14 +65,17 @@ struct RecordingView: View {
                 .padding(.bottom, 40)
             }
 
-            if let error = configurationError {
+            if let displayError {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.largeTitle)
-                    Text(error.localizedDescription)
+                    Text(displayError.localizedDescription)
                         .multilineTextAlignment(.center)
-                    Button("Dismiss") { dismiss() }
-                        .buttonStyle(.borderedProminent)
+                    Button("Dismiss") {
+                        recorder.stopSession()
+                        dismiss()
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
                 .foregroundStyle(.white)
                 .padding()
@@ -85,6 +89,10 @@ struct RecordingView: View {
                 configurationError = error
             }
         }
+    }
+
+    private var displayError: Error? {
+        configurationError ?? recorder.error
     }
 
     private func startRecording() {
