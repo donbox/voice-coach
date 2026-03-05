@@ -1,3 +1,5 @@
+Date: 2026-03-04
+
 # VoiceCoach
 
 VoiceCoach is a SwiftUI vocal practice app for iOS, iPadOS, and Mac Catalyst. Import instructor demo videos as exercises, record your own attempts, review attempts inline, rate takes, and organize practice routines with playlists.
