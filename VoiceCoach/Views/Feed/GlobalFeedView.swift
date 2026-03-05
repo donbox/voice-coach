@@ -30,8 +30,29 @@ struct GlobalFeedView: View {
                 .ignoresSafeArea()
             }
         }
-        .navigationTitle("Feed")
+        .navigationTitle("VoiceCoach")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if !attempts.isEmpty {
+                    Button {
+                        if currentIndex > 0 { currentIndex -= 1 }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(currentIndex == 0)
+                    .keyboardShortcut(",", modifiers: [])
+
+                    Button {
+                        if currentIndex < attempts.count - 1 { currentIndex += 1 }
+                    } label: {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(currentIndex == attempts.count - 1)
+                    .keyboardShortcut(".", modifiers: [])
+                }
+            }
+        }
     }
 
     private func deleteAttempt(_ attempt: Attempt) {
@@ -41,7 +62,7 @@ struct GlobalFeedView: View {
 }
 
 struct FeedVideoPage: View {
-    let attempt: Attempt
+    @Bindable var attempt: Attempt
     let isActive: Bool
     let onDelete: () -> Void
     @State private var player: AVPlayer?
@@ -56,8 +77,9 @@ struct FeedVideoPage: View {
                         .frame(width: geo.size.width, height: geo.size.height)
                 }
 
-                // Overlay: exercise name + date at top
+                // Overlay
                 VStack {
+                    // Exercise name + date at top
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             if let exercise = attempt.exercise {
@@ -77,6 +99,18 @@ struct FeedVideoPage: View {
                     .padding(.top, 8)
 
                     Spacer()
+
+                    // Star rating at bottom left
+                    HStack {
+                        StarRatingView(rating: $attempt.rating)
+                            .font(.title2)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: Capsule())
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 16)
                 }
             }
         }

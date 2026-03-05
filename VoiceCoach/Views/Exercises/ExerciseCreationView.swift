@@ -42,13 +42,14 @@ struct ExerciseCreationView: View {
                             .foregroundStyle(.green)
                     }
 
+                    let hasVideo = selectedVideoURL != nil
                     PhotosPicker(
                         selection: $pickerItem,
                         matching: .videos,
                         photoLibrary: .shared()
                     ) {
                         Label(
-                            selectedVideoURL == nil ? "Choose Video" : "Change Video",
+                            hasVideo ? "Change Video" : "Choose Video",
                             systemImage: "photo.on.rectangle"
                         )
                     }

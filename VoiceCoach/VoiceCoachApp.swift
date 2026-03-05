@@ -8,5 +8,6 @@ struct VoiceCoachApp: App {
             ContentView()
         }
         .modelContainer(for: [Exercise.self, Attempt.self, Playlist.self])
+        .commands { VoiceCoachCommands() }
     }
 }

@@ -4,6 +4,7 @@ import UIKit
 
 struct VideoPlayerView: View {
     let relativePath: String
+    var autoPlay: Bool = false
     @State private var player: AVPlayer?
 
     var body: some View {
@@ -21,7 +22,9 @@ struct VideoPlayerView: View {
         }
         .task(id: relativePath) {
             let url = VideoStorageService.shared.resolveURL(for: relativePath)
-            player = AVPlayer(url: url)
+            let newPlayer = AVPlayer(url: url)
+            player = newPlayer
+            if autoPlay { newPlayer.play() }
         }
         .onDisappear {
             player?.pause()

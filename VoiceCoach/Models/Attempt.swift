@@ -15,6 +15,9 @@ final class Attempt {
     /// Optional user notes.
     var notes: String?
 
+    /// Star rating 1–5; 0 means unrated.
+    var rating: Int = 0
+
     var exercise: Exercise?
 
     init(

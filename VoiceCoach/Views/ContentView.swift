@@ -1,23 +1,29 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             NavigationStack {
                 ExerciseListView()
             }
             .tabItem { Label("Exercises", systemImage: "music.note.list") }
+            .tag(0)
 
             NavigationStack {
                 GlobalFeedView()
             }
             .tabItem { Label("Feed", systemImage: "clock") }
+            .tag(1)
 
             NavigationStack {
                 PlaylistListView()
             }
             .tabItem { Label("Playlists", systemImage: "list.bullet") }
+            .tag(2)
         }
+        .focusedSceneValue(\.appNavigation, AppNavigationActions(switchTab: { selectedTab = $0 }))
     }
 }
 

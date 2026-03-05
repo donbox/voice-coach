@@ -7,12 +7,27 @@ final class RecordingService: NSObject {
     var isRecording = false
     var error: Error?
 
-    private(set) var captureSession = AVCaptureSession()
+    // nonisolated(unsafe) so that deinit (which is non-isolated) can stop the session.
+    // All off-main-actor access is serialized through sessionQueue.
+    nonisolated private(set) var captureSession = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
     private var outputURL: URL?
     private var onRecordingFinished: ((URL) -> Void)?
 
     private let sessionQueue = DispatchQueue(label: "com.voicecoach.capture-session")
+
+    deinit {
+        // Block until any pending startRunning/stopRunning on the sessionQueue has
+        // finished. Without this, the AVCaptureSession can be deallocated while the
+        // capture graph's startRunning is still in-flight, causing a crash in the
+        // BWGraph dispatch_group_leave completion block.
+        let session = captureSession
+        sessionQueue.sync {
+            if session.isRunning {
+                session.stopRunning()
+            }
+        }
+    }
 
     func configure() async throws {
         let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)

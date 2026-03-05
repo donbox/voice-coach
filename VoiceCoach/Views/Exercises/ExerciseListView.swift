@@ -38,7 +38,7 @@ struct ExerciseListView: View {
                 }
             }
         }
-        .navigationTitle("Exercises")
+        .navigationTitle("VoiceCoach")
         .navigationDestination(for: Exercise.self) { exercise in
             ExerciseDetailView(exercise: exercise)
         }

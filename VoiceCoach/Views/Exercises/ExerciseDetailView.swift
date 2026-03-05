@@ -6,7 +6,8 @@ struct ExerciseDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingRecording = false
     @State private var sortNewestFirst = true
-    @State private var selectedAttempt: Attempt?
+    // Index-based selection: avoids stale-closure bugs with Mac Catalyst UIKeyCommands.
+    @State private var selectedAttemptIndex: Int? = nil
 
     private var sortedAttempts: [Attempt] {
         exercise.attempts.sorted { a, b in
@@ -14,55 +15,171 @@ struct ExerciseDetailView: View {
         }
     }
 
+    private var selectedAttempt: Attempt? {
+        guard let idx = selectedAttemptIndex,
+              sortedAttempts.indices.contains(idx) else { return nil }
+        return sortedAttempts[idx]
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Video sits outside the List so AVPlayerViewController
-            // gets proper geometry from SwiftUI's VStack layout.
-            VideoPlayerView(relativePath: exercise.demoVideoRelativePath)
+            videoArea
+            Divider()
+            attemptList
+        }
+        .navigationTitle(exercise.title)
+        .fullScreenCover(isPresented: $showingRecording) {
+            RecordingView(exercise: exercise)
+        }
+        .onChange(of: sortNewestFirst) { _, _ in selectedAttemptIndex = nil }
+        // Provide exercise actions to the Exercise menu.
+        .focusedSceneValue(\.exerciseActions, ExerciseActions(
+            newAttempt: { showingRecording = true },
+            previousAttempt: { selectedAttemptIndex? -= 1 },
+            nextAttempt: { selectedAttemptIndex? += 1 },
+            rateAttempt: { rating in
+                guard let idx = selectedAttemptIndex,
+                      sortedAttempts.indices.contains(idx) else { return }
+                sortedAttempts[idx].rating = rating
+            },
+            canGoPrev: (selectedAttemptIndex ?? 0) > 0,
+            canGoNext: selectedAttemptIndex.map { $0 < sortedAttempts.count - 1 } ?? false,
+            hasAttempt: selectedAttemptIndex != nil
+        ))
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if selectedAttemptIndex != nil {
+                    // Shortcuts are duplicated on the Commands menu items above.
+                    // Mac menu bar fires first when the Commands item is enabled;
+                    // these UIKeyCommands fire as fallback when FocusedSceneValue
+                    // is unreliable (e.g. AVPlayerViewController holds firstResponder).
+                    Button {
+                        selectedAttemptIndex? -= 1
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(selectedAttemptIndex == 0)
+                    .keyboardShortcut(",", modifiers: [])
+
+                    if let idx = selectedAttemptIndex {
+                        Text("\(idx + 1) / \(sortedAttempts.count)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+
+                    Button {
+                        selectedAttemptIndex? += 1
+                    } label: {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(selectedAttemptIndex == sortedAttempts.count - 1)
+                    .keyboardShortcut(".", modifiers: [])
+                }
+
+                Button {
+                    showingRecording = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
+        }
+    }
+
+    // MARK: - Video area
+
+    @ViewBuilder
+    private var videoArea: some View {
+        let relativePath = selectedAttempt?.videoRelativePath ?? exercise.demoVideoRelativePath
+        ZStack(alignment: .bottom) {
+            VideoPlayerView(relativePath: relativePath, autoPlay: selectedAttempt != nil)
                 .aspectRatio(16/9, contentMode: .fit)
                 .frame(maxWidth: .infinity)
 
-            Divider()
+            if let idx = selectedAttemptIndex, sortedAttempts.indices.contains(idx) {
+                let attempt = sortedAttempts[idx]
+                HStack {
+                    Button {
+                        selectedAttemptIndex = nil
+                    } label: {
+                        Label("Demo", systemImage: "arrow.uturn.backward")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .keyboardShortcut(.escape, modifiers: [])
 
-            List {
+                    Spacer()
+
+                    StarRatingView(rating: Binding(
+                        get: { attempt.rating },
+                        set: { attempt.rating = $0 }
+                    ))
+                    .font(.title3)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial, in: Capsule())
+                }
+                .padding(10)
+            }
+        }
+    }
+
+    // MARK: - Attempt list
+
+    private var attemptList: some View {
+        List {
+            Button {
+                showingRecording = true
+            } label: {
+                Label("New Attempt", systemImage: "plus.circle.fill")
+                    .foregroundStyle(.tint)
+            }
+
+            if !sortedAttempts.isEmpty {
                 Section {
-                    if sortedAttempts.isEmpty {
-                        ContentUnavailableView(
-                            "No Attempts Yet",
-                            systemImage: "video.badge.plus",
-                            description: Text("Record your first attempt.")
-                        )
-                    } else {
-                        ForEach(sortedAttempts) { attempt in
-                            Button {
-                                selectedAttempt = attempt
+                    ForEach(sortedAttempts.indices, id: \.self) { idx in
+                        let attempt = sortedAttempts[idx]
+                        let isSelected = selectedAttemptIndex == idx
+                        Button {
+                            selectedAttemptIndex = isSelected ? nil : idx
+                        } label: {
+                            HStack(spacing: 8) {
+                                Text(attempt.recordedAt.formatted(date: .abbreviated, time: .shortened))
+                                Spacer()
+                                StarRatingView(rating: Binding(
+                                    get: { attempt.rating },
+                                    set: { attempt.rating = $0 }
+                                ))
+                                .font(.subheadline)
+                                if let duration = attempt.durationSeconds {
+                                    Text(formatDuration(duration))
+                                        .foregroundStyle(.secondary)
+                                }
+                                Image(systemName: isSelected ? "stop.circle.fill" : "play.circle")
+                                    .foregroundStyle(.tint)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        // Make rows reachable via Tab key.
+                        .focusable()
+                        .listRowBackground(isSelected ? Color.accentColor.opacity(0.12) : nil)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                deleteAttempt(attempt)
                             } label: {
-                                HStack {
-                                    Text(attempt.recordedAt.formatted(date: .abbreviated, time: .shortened))
-                                    Spacer()
-                                    if let duration = attempt.durationSeconds {
-                                        Text(formatDuration(duration))
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Image(systemName: "play.circle")
-                                        .foregroundStyle(.tint)
-                                }
-                                .contentShape(Rectangle())
+                                Label("Delete", systemImage: "trash")
                             }
-                            .buttonStyle(.plain)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteAttempt(attempt)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    deleteAttempt(attempt)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+                        }
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                deleteAttempt(attempt)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
                         }
                     }
@@ -75,25 +192,12 @@ struct ExerciseDetailView: View {
                 }
             }
         }
-        .navigationTitle(exercise.title)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingRecording = true
-                } label: {
-                    Label("Record", systemImage: "record.circle")
-                }
-            }
-        }
-        .fullScreenCover(isPresented: $showingRecording) {
-            RecordingView(exercise: exercise)
-        }
-        .sheet(item: $selectedAttempt) { attempt in
-            AttemptPlayerSheet(attempt: attempt)
-        }
     }
 
+    // MARK: - Helpers
+
     private func deleteAttempt(_ attempt: Attempt) {
+        if selectedAttempt?.id == attempt.id { selectedAttemptIndex = nil }
         try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
         modelContext.delete(attempt)
     }
@@ -102,24 +206,5 @@ struct ExerciseDetailView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", mins, secs)
-    }
-}
-
-struct AttemptPlayerSheet: View {
-    let attempt: Attempt
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VideoPlayerView(relativePath: attempt.videoRelativePath)
-                .ignoresSafeArea(edges: .bottom)
-                .navigationTitle(attempt.recordedAt.formatted(date: .abbreviated, time: .shortened))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { dismiss() }
-                    }
-                }
-        }
     }
 }

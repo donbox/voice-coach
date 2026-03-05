@@ -14,8 +14,10 @@ struct PlaylistDetailView: View {
                     description: Text("Add exercises to build your routine.")
                 )
             } else {
-                ForEach(playlist.exercises) { exercise in
-                    NavigationLink(value: exercise) {
+                ForEach(Array(playlist.exercises.enumerated()), id: \.element.id) { index, exercise in
+                    NavigationLink {
+                        PlaylistExerciseDetailView(exercises: playlist.exercises, startIndex: index)
+                    } label: {
                         ExerciseRowView(exercise: exercise)
                     }
                 }
@@ -24,9 +26,6 @@ struct PlaylistDetailView: View {
             }
         }
         .navigationTitle(playlist.name)
-        .navigationDestination(for: Exercise.self) { exercise in
-            ExerciseDetailView(exercise: exercise)
-        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -52,6 +51,51 @@ struct PlaylistDetailView: View {
         playlist.exercises.move(fromOffsets: source, toOffset: destination)
     }
 }
+
+// MARK: - Playlist-mode exercise navigator
+
+struct PlaylistExerciseDetailView: View {
+    let exercises: [Exercise]
+    @State private var currentIndex: Int
+
+    init(exercises: [Exercise], startIndex: Int) {
+        self.exercises = exercises
+        self._currentIndex = State(initialValue: startIndex)
+    }
+
+    private var current: Exercise { exercises[currentIndex] }
+
+    var body: some View {
+        ExerciseDetailView(exercise: current)
+            .id(current.id)  // reset ExerciseDetailView state when exercise changes
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button {
+                        currentIndex -= 1
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(currentIndex == 0)
+                    .keyboardShortcut("[", modifiers: [])
+
+                    Text("\(currentIndex + 1) / \(exercises.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+
+                    Button {
+                        currentIndex += 1
+                    } label: {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(currentIndex == exercises.count - 1)
+                    .keyboardShortcut("]", modifiers: [])
+                }
+            }
+    }
+}
+
+// MARK: - Exercise picker sheet
 
 struct ExercisePickerView: View {
     let playlist: Playlist

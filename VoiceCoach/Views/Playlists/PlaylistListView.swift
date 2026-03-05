@@ -33,7 +33,7 @@ struct PlaylistListView: View {
                 }
             }
         }
-        .navigationTitle("Playlists")
+        .navigationTitle("VoiceCoach")
         .navigationDestination(for: Playlist.self) { playlist in
             PlaylistDetailView(playlist: playlist)
         }
