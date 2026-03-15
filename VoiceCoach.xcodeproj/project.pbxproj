@@ -409,10 +409,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VoiceCoach/VoiceCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 83MT4RS73J;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "VoiceCoach records video of your practice sessions.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VoiceCoach records audio during your practice sessions.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "VoiceCoach can save and import practice videos from your photo library.";
@@ -439,10 +441,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = VoiceCoach/VoiceCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 83MT4RS73J;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "VoiceCoach records video of your practice sessions.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VoiceCoach records audio during your practice sessions.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "VoiceCoach can save and import practice videos from your photo library.";
