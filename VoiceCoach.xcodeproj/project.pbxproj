@@ -401,7 +401,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceCoach.app/VoiceCoach";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenK.app/tenK";
 			};
 			name = Release;
 		};
@@ -490,7 +490,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceCoach.app/VoiceCoach";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/tenK.app/tenK";
 			};
 			name = Debug;
 		};

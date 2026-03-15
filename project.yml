@@ -24,14 +24,19 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "1"
-        INFOPLIST_KEY_NSCameraUsageDescription: "VoiceCoach records video of your practice sessions."
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: "VoiceCoach records audio during your practice sessions."
-        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "VoiceCoach can save and import practice videos from your photo library."
+        CURRENT_PROJECT_VERSION: "8"
+        CODE_SIGN_ENTITLEMENTS: VoiceCoach/VoiceCoach.entitlements
+        PRODUCT_NAME: tenK
+        INFOPLIST_KEY_CFBundleDisplayName: tenK
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.lifestyle"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: false
+        INFOPLIST_KEY_NSCameraUsageDescription: "tenK records video of your practice sessions."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "tenK records audio during your practice sessions."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "tenK can save and import practice videos from your photo library."
         INFOPLIST_KEY_UILaunchScreen_Generation: true
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
-        PRODUCT_BUNDLE_IDENTIFIER: com.voicecoach.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.boxenllc.tenk
         TARGETED_DEVICE_FAMILY: "1,2"
 
   VoiceCoachTests:
@@ -47,4 +52,4 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
-        PRODUCT_BUNDLE_IDENTIFIER: com.voicecoach.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.boxenllc.tenk.tests

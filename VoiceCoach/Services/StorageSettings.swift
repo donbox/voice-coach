@@ -37,7 +37,7 @@ enum StorageSettings {
     }
 
     static var photosAlbumName: String {
-        get { defaults.string(forKey: "photosAlbumName") ?? "VoiceCoach" }
+        get { defaults.string(forKey: "photosAlbumName") ?? "tenK" }
         set { defaults.set(newValue, forKey: "photosAlbumName") }
     }
 

@@ -98,7 +98,7 @@ struct VoiceCoachCommands: Commands {
             Button("Playlists") { nav?.switchTab(2) }
                 .keyboardShortcut("3", modifiers: .command)
             Button("Settings")  { nav?.switchTab(3) }
-                .keyboardShortcut(",", modifiers: .command)
+                .keyboardShortcut("4", modifiers: .command)
         }
     }
 }

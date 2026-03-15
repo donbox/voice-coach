@@ -27,7 +27,7 @@ final class Attempt {
 
     /// True when the video is backed by a Photos library asset.
     var isPhotosBackedVideo: Bool {
-        photosAssetIdentifier != nil
+        photosAssetIdentifier?.isEmpty == false
     }
 
     init(

@@ -59,13 +59,21 @@ struct ExerciseListView: View {
     }
 
     private func deleteExercise(_ exercise: Exercise) {
-        // Clean up demo video
-        try? VideoStorageService.shared.deleteVideo(at: exercise.demoVideoRelativePath)
-        // Clean up all attempt videos
-        for attempt in exercise.attempts {
-            try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
+        Task { @MainActor in
+            // Clean up demo video
+            try? VideoStorageService.shared.deleteVideo(at: exercise.demoVideoRelativePath)
+            // Clean up all attempt videos
+            for attempt in exercise.attempts {
+                if attempt.isPhotosBackedVideo {
+                    if let assetID = attempt.photosAssetIdentifier {
+                        _ = await PhotosLibraryService.shared.deleteAsset(assetID)
+                    }
+                } else {
+                    try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
+                }
+            }
+            modelContext.delete(exercise)
         }
-        modelContext.delete(exercise)
     }
 }
 

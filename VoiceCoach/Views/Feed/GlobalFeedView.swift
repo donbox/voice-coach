@@ -59,7 +59,8 @@ struct GlobalFeedView: View {
         if attempt.isPhotosBackedVideo {
             Task { @MainActor in
                 if let assetID = attempt.photosAssetIdentifier {
-                    _ = await PhotosLibraryService.shared.deleteAsset(assetID)
+                    let deleted = await PhotosLibraryService.shared.deleteAsset(assetID)
+                    guard deleted else { return }
                 }
                 modelContext.delete(attempt)
             }
