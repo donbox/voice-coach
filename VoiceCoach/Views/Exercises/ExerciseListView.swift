@@ -39,7 +39,7 @@ struct ExerciseListView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color(red: 1.0, green: 0.94, blue: 0.95))
+        .background(Color(.exerciseListBackground))
         .navigationTitle("tenK")
         .navigationDestination(for: Exercise.self) { exercise in
             ExerciseDetailView(exercise: exercise)
