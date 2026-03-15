@@ -5,6 +5,8 @@ struct VideoPlayerView: View {
     let relativePath: String
     var photosAssetIdentifier: String? = nil
     var autoPlay: Bool = false
+    var onDeleteAttempt: (() -> Void)? = nil
+    var onRelinkVideo: (() -> Void)? = nil
     @State private var player: AVPlayer?
     @State private var videoUnavailable = false
 
@@ -14,7 +16,7 @@ struct VideoPlayerView: View {
                 Rectangle()
                     .fill(.black)
                     .overlay {
-                        VStack(spacing: 8) {
+                        VStack(spacing: 12) {
                             Image(systemName: "video.slash")
                                 .font(.largeTitle)
                             Text("Video Unavailable")
@@ -22,6 +24,30 @@ struct VideoPlayerView: View {
                             Text("This video may have been deleted or is not accessible.")
                                 .font(.caption)
                                 .multilineTextAlignment(.center)
+
+                            if onDeleteAttempt != nil || onRelinkVideo != nil {
+                                HStack(spacing: 12) {
+                                    if let onRelinkVideo {
+                                        Button {
+                                            onRelinkVideo()
+                                        } label: {
+                                            Label("Re-link Video", systemImage: "link")
+                                                .font(.subheadline)
+                                        }
+                                        .buttonStyle(.bordered)
+                                    }
+                                    if let onDeleteAttempt {
+                                        Button(role: .destructive) {
+                                            onDeleteAttempt()
+                                        } label: {
+                                            Label("Delete Attempt", systemImage: "trash")
+                                                .font(.subheadline)
+                                        }
+                                        .buttonStyle(.bordered)
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
                         }
                         .foregroundStyle(.secondary)
                         .padding()

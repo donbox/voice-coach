@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import PhotosUI
 
 struct ExerciseDetailView: View {
     @Bindable var exercise: Exercise
@@ -8,6 +9,8 @@ struct ExerciseDetailView: View {
     @State private var sortNewestFirst = true
     // Index-based selection: avoids stale-closure bugs with Mac Catalyst UIKeyCommands.
     @State private var selectedAttemptIndex: Int? = nil
+    @State private var relinkPickerItem: PhotosPickerItem?
+    @State private var relinkAttempt: Attempt?
 
     private var sortedAttempts: [Attempt] {
         exercise.attempts.sorted { a, b in
@@ -32,6 +35,18 @@ struct ExerciseDetailView: View {
             RecordingView(exercise: exercise)
         }
         .onChange(of: sortNewestFirst) { _, _ in selectedAttemptIndex = nil }
+        .photosPicker(isPresented: Binding(
+            get: { relinkAttempt != nil },
+            set: { if !$0 { relinkAttempt = nil } }
+        ), selection: $relinkPickerItem, matching: .videos, photoLibrary: .shared())
+        .onChange(of: relinkPickerItem) { _, newItem in
+            guard let newItem, let attempt = relinkAttempt else { return }
+            relinkPickerItem = nil
+            Task {
+                await relinkVideo(newItem, to: attempt)
+                relinkAttempt = nil
+            }
+        }
         // Provide exercise actions to the Exercise menu.
         .focusedSceneValue(\.exerciseActions, ExerciseActions(
             newAttempt: { showingRecording = true },
@@ -94,9 +109,19 @@ struct ExerciseDetailView: View {
         let relativePath = selectedAttempt?.videoRelativePath ?? exercise.demoVideoRelativePath
         let photosID = selectedAttempt?.photosAssetIdentifier
         ZStack(alignment: .bottom) {
-            VideoPlayerView(relativePath: relativePath, photosAssetIdentifier: photosID, autoPlay: selectedAttempt != nil)
-                .aspectRatio(16/9, contentMode: .fit)
-                .frame(maxWidth: .infinity)
+            VideoPlayerView(
+                relativePath: relativePath,
+                photosAssetIdentifier: photosID,
+                autoPlay: selectedAttempt != nil,
+                onDeleteAttempt: selectedAttempt.map { attempt in
+                    { deleteAttempt(attempt) }
+                },
+                onRelinkVideo: selectedAttempt.map { attempt in
+                    { relinkAttempt = attempt }
+                }
+            )
+            .aspectRatio(16/9, contentMode: .fit)
+            .frame(maxWidth: .infinity)
 
             if let idx = selectedAttemptIndex, sortedAttempts.indices.contains(idx) {
                 let attempt = sortedAttempts[idx]
@@ -210,6 +235,28 @@ struct ExerciseDetailView: View {
         } else {
             try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
             modelContext.delete(attempt)
+        }
+    }
+
+    @MainActor
+    private func relinkVideo(_ item: PhotosPickerItem, to attempt: Attempt) async {
+        let oldLocalPath = attempt.videoRelativePath
+
+        if let assetID = item.itemIdentifier,
+           PhotosLibraryService.shared.assetExists(assetID) {
+            attempt.photosAssetIdentifier = assetID
+            attempt.videoRelativePath = ""
+        } else if let transferred = try? await item.loadTransferable(type: VideoTransferable.self),
+                  let relativePath = try? VideoStorageService.shared.importAttemptVideo(from: transferred.url) {
+            attempt.videoRelativePath = relativePath
+            attempt.photosAssetIdentifier = nil
+        } else {
+            return
+        }
+
+        // Clean up the old local file if it existed
+        if !oldLocalPath.isEmpty {
+            try? VideoStorageService.shared.deleteVideo(at: oldLocalPath)
         }
     }
 

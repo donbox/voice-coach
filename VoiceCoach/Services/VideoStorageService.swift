@@ -50,6 +50,24 @@ final class VideoStorageService: Sendable {
         return relativePath
     }
 
+    /// Copies an existing video into the attempts directory.
+    /// Returns the relative path from baseDirectory.
+    func importAttemptVideo(from sourceURL: URL) throws -> String {
+        let filename = UUID().uuidString + "." + (sourceURL.pathExtension.isEmpty ? "mov" : sourceURL.pathExtension)
+        let relativePath = "attempts/\(filename)"
+        let destination = baseDirectory.appending(path: relativePath)
+
+        let didStartAccessing = sourceURL.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {
+                sourceURL.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        try FileManager.default.copyItem(at: sourceURL, to: destination)
+        return relativePath
+    }
+
     /// Returns a new file URL for recording an attempt.
     func newAttemptFileURL() -> (absoluteURL: URL, relativePath: String) {
         let filename = UUID().uuidString + ".mov"

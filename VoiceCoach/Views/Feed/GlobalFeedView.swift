@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AVKit
+import PhotosUI
 
 struct GlobalFeedView: View {
     @Query(sort: \Attempt.recordedAt, order: .reverse) private var attempts: [Attempt]
@@ -53,6 +54,11 @@ struct GlobalFeedView: View {
                 }
             }
         }
+        .onChange(of: attempts.count) { _, newCount in
+            if newCount > 0 {
+                currentIndex = min(currentIndex, newCount - 1)
+            }
+        }
     }
 
     private func deleteAttempt(_ attempt: Attempt) {
@@ -77,6 +83,8 @@ struct FeedVideoPage: View {
     let onDelete: () -> Void
     @State private var player: AVPlayer?
     @State private var videoUnavailable = false
+    @State private var showRelinkPicker = false
+    @State private var relinkPickerItem: PhotosPickerItem?
 
     var body: some View {
         GeometryReader { geo in
@@ -84,11 +92,32 @@ struct FeedVideoPage: View {
                 Color.black
 
                 if videoUnavailable {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         Image(systemName: "video.slash")
                             .font(.largeTitle)
                         Text("Video Unavailable")
                             .font(.headline)
+                        Text("This video may have been deleted or is not accessible.")
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                        HStack(spacing: 12) {
+                            Button {
+                                showRelinkPicker = true
+                            } label: {
+                                Label("Re-link Video", systemImage: "link")
+                                    .font(.subheadline)
+                            }
+                            .buttonStyle(.bordered)
+
+                            Button(role: .destructive) {
+                                onDelete()
+                            } label: {
+                                Label("Delete Attempt", systemImage: "trash")
+                                    .font(.subheadline)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding(.top, 4)
                     }
                     .foregroundStyle(.secondary)
                 } else if let player {
@@ -140,6 +169,14 @@ struct FeedVideoPage: View {
                 Label("Delete Attempt", systemImage: "trash")
             }
         }
+        .photosPicker(isPresented: $showRelinkPicker, selection: $relinkPickerItem, matching: .videos, photoLibrary: .shared())
+        .onChange(of: relinkPickerItem) { _, newItem in
+            guard let newItem else { return }
+            relinkPickerItem = nil
+            Task {
+                await relinkVideo(newItem, to: attempt)
+            }
+        }
         .task {
             if let assetID = attempt.photosAssetIdentifier {
                 do {
@@ -170,6 +207,48 @@ struct FeedVideoPage: View {
             } else {
                 player?.pause()
             }
+        }
+    }
+
+    @MainActor
+    private func relinkVideo(_ item: PhotosPickerItem, to attempt: Attempt) async {
+        let oldLocalPath = attempt.videoRelativePath
+
+        if let assetID = item.itemIdentifier,
+           PhotosLibraryService.shared.assetExists(assetID) {
+            attempt.photosAssetIdentifier = assetID
+            attempt.videoRelativePath = ""
+        } else if let transferred = try? await item.loadTransferable(type: VideoTransferable.self),
+                  let relativePath = try? VideoStorageService.shared.importAttemptVideo(from: transferred.url) {
+            attempt.videoRelativePath = relativePath
+            attempt.photosAssetIdentifier = nil
+        } else {
+            return // relink failed — stay in unavailable state
+        }
+
+        // Clean up the old local file if it existed
+        if !oldLocalPath.isEmpty {
+            try? VideoStorageService.shared.deleteVideo(at: oldLocalPath)
+        }
+
+        // Reload video
+        videoUnavailable = false
+        if let assetID = attempt.photosAssetIdentifier {
+            do {
+                let playerItem = try await PhotosLibraryService.shared.playerItem(for: assetID)
+                player = AVPlayer(playerItem: playerItem)
+                if isActive { player?.play() }
+            } catch {
+                videoUnavailable = true
+            }
+        } else {
+            let url = VideoStorageService.shared.resolveURL(for: attempt.videoRelativePath)
+            guard FileManager.default.fileExists(atPath: url.path()) else {
+                videoUnavailable = true
+                return
+            }
+            player = AVPlayer(url: url)
+            if isActive { player?.play() }
         }
     }
 }
