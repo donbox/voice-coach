@@ -30,7 +30,7 @@ struct GlobalFeedView: View {
                 .ignoresSafeArea()
             }
         }
-        .navigationTitle("VoiceCoach")
+        .navigationTitle("tenK")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
