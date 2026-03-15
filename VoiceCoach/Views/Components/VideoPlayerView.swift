@@ -1,15 +1,32 @@
 import AVKit
 import SwiftUI
-import UIKit
 
 struct VideoPlayerView: View {
     let relativePath: String
+    var photosAssetIdentifier: String? = nil
     var autoPlay: Bool = false
     @State private var player: AVPlayer?
+    @State private var videoUnavailable = false
 
     var body: some View {
         Group {
-            if let player {
+            if videoUnavailable {
+                Rectangle()
+                    .fill(.black)
+                    .overlay {
+                        VStack(spacing: 8) {
+                            Image(systemName: "video.slash")
+                                .font(.largeTitle)
+                            Text("Video Unavailable")
+                                .font(.headline)
+                            Text("This video may have been deleted or is not accessible.")
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                        }
+                        .foregroundStyle(.secondary)
+                        .padding()
+                    }
+            } else if let player {
                 PlayerViewControllerRepresentable(player: player)
             } else {
                 Rectangle()
@@ -20,11 +37,30 @@ struct VideoPlayerView: View {
                     }
             }
         }
-        .task(id: relativePath) {
-            let url = VideoStorageService.shared.resolveURL(for: relativePath)
-            let newPlayer = AVPlayer(url: url)
-            player = newPlayer
-            if autoPlay { newPlayer.play() }
+        .task(id: "\(relativePath)|\(photosAssetIdentifier ?? "")") {
+            videoUnavailable = false
+            player?.pause()
+            player = nil
+
+            if let assetID = photosAssetIdentifier {
+                do {
+                    let item = try await PhotosLibraryService.shared.playerItem(for: assetID)
+                    let newPlayer = AVPlayer(playerItem: item)
+                    player = newPlayer
+                    if autoPlay { newPlayer.play() }
+                } catch {
+                    videoUnavailable = true
+                }
+            } else {
+                let url = VideoStorageService.shared.resolveURL(for: relativePath)
+                guard FileManager.default.fileExists(atPath: url.path()) else {
+                    videoUnavailable = true
+                    return
+                }
+                let newPlayer = AVPlayer(url: url)
+                player = newPlayer
+                if autoPlay { newPlayer.play() }
+            }
         }
         .onDisappear {
             player?.pause()

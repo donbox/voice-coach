@@ -92,8 +92,9 @@ struct ExerciseDetailView: View {
     @ViewBuilder
     private var videoArea: some View {
         let relativePath = selectedAttempt?.videoRelativePath ?? exercise.demoVideoRelativePath
+        let photosID = selectedAttempt?.photosAssetIdentifier
         ZStack(alignment: .bottom) {
-            VideoPlayerView(relativePath: relativePath, autoPlay: selectedAttempt != nil)
+            VideoPlayerView(relativePath: relativePath, photosAssetIdentifier: photosID, autoPlay: selectedAttempt != nil)
                 .aspectRatio(16/9, contentMode: .fit)
                 .frame(maxWidth: .infinity)
 
@@ -198,8 +199,17 @@ struct ExerciseDetailView: View {
 
     private func deleteAttempt(_ attempt: Attempt) {
         if selectedAttempt?.id == attempt.id { selectedAttemptIndex = nil }
-        try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
-        modelContext.delete(attempt)
+        if attempt.isPhotosBackedVideo {
+            Task { @MainActor in
+                if let assetID = attempt.photosAssetIdentifier {
+                    _ = await PhotosLibraryService.shared.deleteAsset(assetID)
+                }
+                modelContext.delete(attempt)
+            }
+        } else {
+            try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
+            modelContext.delete(attempt)
+        }
     }
 
     private func formatDuration(_ seconds: Double) -> String {

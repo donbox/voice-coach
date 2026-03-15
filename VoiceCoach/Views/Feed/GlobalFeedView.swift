@@ -56,8 +56,17 @@ struct GlobalFeedView: View {
     }
 
     private func deleteAttempt(_ attempt: Attempt) {
-        try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
-        modelContext.delete(attempt)
+        if attempt.isPhotosBackedVideo {
+            Task { @MainActor in
+                if let assetID = attempt.photosAssetIdentifier {
+                    _ = await PhotosLibraryService.shared.deleteAsset(assetID)
+                }
+                modelContext.delete(attempt)
+            }
+        } else {
+            try? VideoStorageService.shared.deleteVideo(at: attempt.videoRelativePath)
+            modelContext.delete(attempt)
+        }
     }
 }
 
@@ -66,13 +75,22 @@ struct FeedVideoPage: View {
     let isActive: Bool
     let onDelete: () -> Void
     @State private var player: AVPlayer?
+    @State private var videoUnavailable = false
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 Color.black
 
-                if let player {
+                if videoUnavailable {
+                    VStack(spacing: 8) {
+                        Image(systemName: "video.slash")
+                            .font(.largeTitle)
+                        Text("Video Unavailable")
+                            .font(.headline)
+                    }
+                    .foregroundStyle(.secondary)
+                } else if let player {
                     FeedPlayerRepresentable(player: player)
                         .frame(width: geo.size.width, height: geo.size.height)
                 }
@@ -121,11 +139,23 @@ struct FeedVideoPage: View {
                 Label("Delete Attempt", systemImage: "trash")
             }
         }
-        .onAppear {
-            let url = VideoStorageService.shared.resolveURL(for: attempt.videoRelativePath)
-            player = AVPlayer(url: url)
-            if isActive {
-                player?.play()
+        .task {
+            if let assetID = attempt.photosAssetIdentifier {
+                do {
+                    let item = try await PhotosLibraryService.shared.playerItem(for: assetID)
+                    player = AVPlayer(playerItem: item)
+                    if isActive { player?.play() }
+                } catch {
+                    videoUnavailable = true
+                }
+            } else {
+                let url = VideoStorageService.shared.resolveURL(for: attempt.videoRelativePath)
+                guard FileManager.default.fileExists(atPath: url.path()) else {
+                    videoUnavailable = true
+                    return
+                }
+                player = AVPlayer(url: url)
+                if isActive { player?.play() }
             }
         }
         .onDisappear {

@@ -27,6 +27,7 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_KEY_NSCameraUsageDescription: "VoiceCoach records video of your practice sessions."
         INFOPLIST_KEY_NSMicrophoneUsageDescription: "VoiceCoach records audio during your practice sessions."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "VoiceCoach can save and import practice videos from your photo library."
         INFOPLIST_KEY_UILaunchScreen_Generation: true
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"

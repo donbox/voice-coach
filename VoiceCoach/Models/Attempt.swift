@@ -7,7 +7,12 @@ final class Attempt {
     var recordedAt: Date
 
     /// Relative path from the app's Documents/VoiceCoachMedia directory.
+    /// Empty string when the video is stored in Photos only.
     var videoRelativePath: String
+
+    /// PHAsset local identifier when the video is stored in the Photos library.
+    /// Nil means the video uses local app storage only.
+    var photosAssetIdentifier: String?
 
     /// Duration in seconds, written after recording finishes.
     var durationSeconds: Double?
@@ -20,13 +25,20 @@ final class Attempt {
 
     var exercise: Exercise?
 
+    /// True when the video is backed by a Photos library asset.
+    var isPhotosBackedVideo: Bool {
+        photosAssetIdentifier != nil
+    }
+
     init(
         videoRelativePath: String,
-        exercise: Exercise
+        exercise: Exercise,
+        photosAssetIdentifier: String? = nil
     ) {
         self.id = UUID()
         self.recordedAt = Date()
         self.videoRelativePath = videoRelativePath
+        self.photosAssetIdentifier = photosAssetIdentifier
         self.exercise = exercise
     }
 }

@@ -22,6 +22,12 @@ struct ContentView: View {
             }
             .tabItem { Label("Playlists", systemImage: "list.bullet") }
             .tag(2)
+
+            NavigationStack {
+                SettingsView()
+            }
+            .tabItem { Label("Settings", systemImage: "gear") }
+            .tag(3)
         }
         .focusedSceneValue(\.appNavigation, AppNavigationActions(switchTab: { selectedTab = $0 }))
     }

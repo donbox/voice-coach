@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,7 @@
 		377602A5CB388C1F00C942A4 /* SortOrderPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1B6B50EAD3D503E12E9E77 /* SortOrderPicker.swift */; };
 		38EB3DB2F6066FDA7179BB0A /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA956759F5DD494D3D4A70 /* Playlist.swift */; };
 		41548AA0A74914BBA85D057E /* RecordingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028EB168A91C7FC05A5C06EC /* RecordingServiceTests.swift */; };
+		4383444764E61BB71F06EFBA /* PhotosLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94F9629A3D555B1AAF6901D /* PhotosLibraryService.swift */; };
 		447465BA36FD09C2C189A4A8 /* GlobalFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6E49B6A9127F48C3F33858 /* GlobalFeedView.swift */; };
 		546503D2CE44EF9C69622B7F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA9ECF6F6601A6D3635ADC50 /* ContentView.swift */; };
 		588ABF9121EF657E615FF872 /* VoiceCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBA259BEBB8904577C24616 /* VoiceCoachApp.swift */; };
@@ -21,6 +22,7 @@
 		6FF94C03C8AF46D71E0E32B9 /* VideoStorageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B69C8BDA4E0D0CA96338289 /* VideoStorageServiceTests.swift */; };
 		876B1DC536C4D9B05442D1C8 /* VoiceCoachCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9551777CF4AA8B0C388B5171 /* VoiceCoachCommands.swift */; };
 		8878115BFF8374775010E226 /* AttemptRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7ABF31977CAD4ED0112ADC2 /* AttemptRowView.swift */; };
+		908701BAE74F604B11937A51 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA27A18EBF0DD4A1365F8ECD /* SettingsView.swift */; };
 		9569355A3F305F1C7E12B4C6 /* VideoStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DECA07E37148315B8F5B4E /* VideoStorageService.swift */; };
 		97F0DD164EBBD0DA8439B000 /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45815BC5B096A124A5C5019 /* ExerciseDetailView.swift */; };
 		A49AB7E79BE2189D00E98C15 /* ExerciseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3928F4DAB7947CECE657E4 /* ExerciseListView.swift */; };
@@ -32,6 +34,7 @@
 		CA6FFC8E03F6BCF636CFB55D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97DEF1E542373479B9BC5D18 /* Assets.xcassets */; };
 		CC1AE6080EB4566907AC2135 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D95F734665E7D448A8F43E /* RecordingView.swift */; };
 		CCCF56A5F429229D54A43890 /* CameraPreviewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4428C2DADFDA311301690E /* CameraPreviewRepresentable.swift */; };
+		D5CA5ADCC0445683B3521914 /* StorageSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992F9FE6216227191E86C87F /* StorageSettings.swift */; };
 		E01EE294CD4D04F9130F4354 /* PlaylistDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F226A59534549D40EF6FCE60 /* PlaylistDetailView.swift */; };
 		F890154B6379E22CC4DDFE81 /* VideoTransferable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2349F32EAE67429F9C136C85 /* VideoTransferable.swift */; };
 /* End PBXBuildFile section */
@@ -64,6 +67,7 @@
 		8773FAC33150AAF1542FC81F /* StarRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarRatingView.swift; sourceTree = "<group>"; };
 		9551777CF4AA8B0C388B5171 /* VoiceCoachCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCoachCommands.swift; sourceTree = "<group>"; };
 		97DEF1E542373479B9BC5D18 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		992F9FE6216227191E86C87F /* StorageSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageSettings.swift; sourceTree = "<group>"; };
 		9B3928F4DAB7947CECE657E4 /* ExerciseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseListView.swift; sourceTree = "<group>"; };
 		9B4428C2DADFDA311301690E /* CameraPreviewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewRepresentable.swift; sourceTree = "<group>"; };
 		9E1B6B50EAD3D503E12E9E77 /* SortOrderPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortOrderPicker.swift; sourceTree = "<group>"; };
@@ -71,11 +75,13 @@
 		B45815BC5B096A124A5C5019 /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
 		BA9ECF6F6601A6D3635ADC50 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BAAF0EF383FA96647DD837A5 /* RecordingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingService.swift; sourceTree = "<group>"; };
+		CA27A18EBF0DD4A1365F8ECD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D6DECA07E37148315B8F5B4E /* VideoStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoStorageService.swift; sourceTree = "<group>"; };
 		D7ABF31977CAD4ED0112ADC2 /* AttemptRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptRowView.swift; sourceTree = "<group>"; };
+		D94F9629A3D555B1AAF6901D /* PhotosLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosLibraryService.swift; sourceTree = "<group>"; };
 		E848C8DC86CBD82220EB97E8 /* ExerciseCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseCreationView.swift; sourceTree = "<group>"; };
 		F226A59534549D40EF6FCE60 /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailView.swift; sourceTree = "<group>"; };
-		FBA430A568031616835D445D /* VoiceCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VoiceCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBA430A568031616835D445D /* VoiceCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -121,6 +127,14 @@
 			path = VoiceCoach;
 			sourceTree = "<group>";
 		};
+		5C069B8DD605D8345302CA76 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				CA27A18EBF0DD4A1365F8ECD /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		5F51C67FF219AFA47EA445A5 /* Recording */ = {
 			isa = PBXGroup;
 			children = (
@@ -150,7 +164,9 @@
 		917C08E85768BF5A7705E3E7 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				D94F9629A3D555B1AAF6901D /* PhotosLibraryService.swift */,
 				BAAF0EF383FA96647DD837A5 /* RecordingService.swift */,
+				992F9FE6216227191E86C87F /* StorageSettings.swift */,
 				D6DECA07E37148315B8F5B4E /* VideoStorageService.swift */,
 			);
 			path = Services;
@@ -185,6 +201,7 @@
 				E5C25CB27F0F85129D363B85 /* Feed */,
 				8490E0F0981B58E0568800EA /* Playlists */,
 				5F51C67FF219AFA47EA445A5 /* Recording */,
+				5C069B8DD605D8345302CA76 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -292,7 +309,6 @@
 			);
 			mainGroup = 9ABE1EA2FC468584210789C1;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -328,14 +344,17 @@
 				A49AB7E79BE2189D00E98C15 /* ExerciseListView.swift in Sources */,
 				58D8863F4E40A9B4FC0FF365 /* ExerciseRowView.swift in Sources */,
 				447465BA36FD09C2C189A4A8 /* GlobalFeedView.swift in Sources */,
+				4383444764E61BB71F06EFBA /* PhotosLibraryService.swift in Sources */,
 				38EB3DB2F6066FDA7179BB0A /* Playlist.swift in Sources */,
 				E01EE294CD4D04F9130F4354 /* PlaylistDetailView.swift in Sources */,
 				C6DCBE7F718F6BF808E84436 /* PlaylistListView.swift in Sources */,
 				A9A2753439895370FCE2B7BD /* PreviewSampleData.swift in Sources */,
 				B3F81F12F90AD164443D8C1F /* RecordingService.swift in Sources */,
 				CC1AE6080EB4566907AC2135 /* RecordingView.swift in Sources */,
+				908701BAE74F604B11937A51 /* SettingsView.swift in Sources */,
 				377602A5CB388C1F00C942A4 /* SortOrderPicker.swift in Sources */,
 				1F35DCC3CFD5593C99734263 /* StarRatingView.swift in Sources */,
+				D5CA5ADCC0445683B3521914 /* StorageSettings.swift in Sources */,
 				B311AADDCAF4ACAE8F7AB72E /* VideoPlayerView.swift in Sources */,
 				9569355A3F305F1C7E12B4C6 /* VideoStorageService.swift in Sources */,
 				F890154B6379E22CC4DDFE81 /* VideoTransferable.swift in Sources */,
@@ -391,10 +410,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 83MT4RS73J;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "VoiceCoach records video of your practice sessions.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VoiceCoach records audio during your practice sessions.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "VoiceCoach can save and import practice videos from your photo library.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -403,7 +424,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.voicecoach.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boxenllc.tenk;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
@@ -418,10 +439,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 83MT4RS73J;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "VoiceCoach records video of your practice sessions.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VoiceCoach records audio during your practice sessions.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "VoiceCoach can save and import practice videos from your photo library.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -430,7 +453,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.voicecoach.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boxenllc.tenk;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
