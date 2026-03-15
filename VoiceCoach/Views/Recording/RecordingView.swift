@@ -7,6 +7,7 @@ struct RecordingView: View {
     @State private var recorder = RecordingService()
     @State private var configurationError: Error?
     @State private var isSavingToPhotos = false
+    @State private var photosSaveError: String?
 
     var body: some View {
         ZStack {
@@ -98,6 +99,17 @@ struct RecordingView: View {
                 configurationError = error
             }
         }
+        .alert("Photos Save Failed", isPresented: Binding(
+            get: { photosSaveError != nil },
+            set: { if !$0 { photosSaveError = nil } }
+        )) {
+            Button("OK") {
+                photosSaveError = nil
+                dismiss()
+            }
+        } message: {
+            Text("Video was saved locally instead.\n\(photosSaveError ?? "")")
+        }
     }
 
     private var displayError: Error? {
@@ -136,13 +148,16 @@ struct RecordingView: View {
                 )
                 modelContext.insert(attempt)
             } catch {
-                // Fallback: keep as local storage if Photos save fails
+                // Fallback: keep as local storage but inform the user
                 let attempt = Attempt(videoRelativePath: localRelativePath, exercise: exercise)
                 modelContext.insert(attempt)
+                photosSaveError = error.localizedDescription
             }
             isSavingToPhotos = false
             recorder.stopSession()
-            dismiss()
+            if photosSaveError == nil {
+                dismiss()
+            }
         }
     }
 }

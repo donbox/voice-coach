@@ -3,20 +3,20 @@ import SwiftData
 
 @Model
 final class Exercise {
-    var id: UUID
-    var title: String
-    var category: String
-    var courseSession: String
-    var createdAt: Date
+    var id: UUID = UUID()
+    var title: String = ""
+    var category: String = ""
+    var courseSession: String = ""
+    var createdAt: Date = Date()
 
     /// Relative path from the app's Documents/VoiceCoachMedia directory.
-    var demoVideoRelativePath: String
+    var demoVideoRelativePath: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \Attempt.exercise)
-    var attempts: [Attempt]
+    var attempts: [Attempt] = []
 
     @Relationship(inverse: \Playlist.exercises)
-    var playlists: [Playlist]
+    var playlists: [Playlist] = []
 
     init(
         title: String,

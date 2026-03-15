@@ -3,12 +3,12 @@ import SwiftData
 
 @Model
 final class Attempt {
-    var id: UUID
-    var recordedAt: Date
+    var id: UUID = UUID()
+    var recordedAt: Date = Date()
 
     /// Relative path from the app's Documents/VoiceCoachMedia directory.
     /// Empty string when the video is stored in Photos only.
-    var videoRelativePath: String
+    var videoRelativePath: String = ""
 
     /// PHAsset local identifier when the video is stored in the Photos library.
     /// Nil means the video uses local app storage only.

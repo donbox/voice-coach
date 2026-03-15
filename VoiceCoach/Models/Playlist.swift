@@ -3,10 +3,10 @@ import SwiftData
 
 @Model
 final class Playlist {
-    var id: UUID
-    var name: String
-    var createdAt: Date
-    var exercises: [Exercise]
+    var id: UUID = UUID()
+    var name: String = ""
+    var createdAt: Date = Date()
+    var exercises: [Exercise] = []
 
     init(name: String, exercises: [Exercise] = []) {
         self.id = UUID()

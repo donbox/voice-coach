@@ -96,6 +96,16 @@ final class RecordingService: NSObject {
             throw RecordingError.sessionConfigurationFailed
         }
         captureSession.addOutput(movieOutput)
+
+        // Force mono audio on Mac Catalyst to prevent stereo channel timing skew.
+        #if targetEnvironment(macCatalyst)
+        if let audioConnection = movieOutput.connection(with: .audio) {
+            movieOutput.setOutputSettings(
+                [AVNumberOfChannelsKey: 1],
+                for: audioConnection
+            )
+        }
+        #endif
     }
 
     func startSession() {

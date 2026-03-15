@@ -30,7 +30,7 @@ enum StorageSettings {
 
     static var mode: AttemptStorageMode {
         get {
-            let raw = defaults.string(forKey: "attemptStorageMode") ?? AttemptStorageMode.local.rawValue
+            let raw = defaults.string(forKey: "attemptStorageMode") ?? AttemptStorageMode.photosAlbum.rawValue
             return AttemptStorageMode(rawValue: raw) ?? .local
         }
         set { defaults.set(newValue.rawValue, forKey: "attemptStorageMode") }
