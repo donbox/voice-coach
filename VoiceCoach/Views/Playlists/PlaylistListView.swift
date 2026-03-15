@@ -33,6 +33,8 @@ struct PlaylistListView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color(red: 0.94, green: 0.96, blue: 1.0))
         .navigationTitle("tenK")
         .navigationDestination(for: Playlist.self) { playlist in
             PlaylistDetailView(playlist: playlist)
