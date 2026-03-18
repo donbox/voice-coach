@@ -6,6 +6,7 @@ import UIKit
 final class RecordingService: NSObject {
     var isRecording = false
     var error: Error?
+    var usingFrontCamera = false
 
     // nonisolated(unsafe) so that deinit (which is non-isolated) can stop the session.
     // All off-main-actor access is serialized through sessionQueue.
@@ -48,11 +49,48 @@ final class RecordingService: NSObject {
 
         let captureSession = self.captureSession
         let movieOutput = self.movieOutput
+        let position: AVCaptureDevice.Position = usingFrontCamera ? .front : .back
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async {
                 do {
-                    try RecordingService.configureSession(captureSession, movieOutput: movieOutput)
+                    try RecordingService.configureSession(captureSession, movieOutput: movieOutput, position: position)
+                    continuation.resume()
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    func flipCamera() async throws {
+        usingFrontCamera.toggle()
+        let captureSession = self.captureSession
+        let movieOutput = self.movieOutput
+        let position: AVCaptureDevice.Position = usingFrontCamera ? .front : .back
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async {
+                do {
+                    // Remove existing video input
+                    for input in captureSession.inputs {
+                        if let deviceInput = input as? AVCaptureDeviceInput,
+                           deviceInput.device.hasMediaType(.video) {
+                            captureSession.removeInput(deviceInput)
+                        }
+                    }
+                    captureSession.beginConfiguration()
+                    defer { captureSession.commitConfiguration() }
+
+                    guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+                            ?? AVCaptureDevice.default(for: .video) else {
+                        throw RecordingError.cameraUnavailable
+                    }
+                    let videoInput = try AVCaptureDeviceInput(device: camera)
+                    guard captureSession.canAddInput(videoInput) else {
+                        throw RecordingError.sessionConfigurationFailed
+                    }
+                    captureSession.addInput(videoInput)
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -63,15 +101,16 @@ final class RecordingService: NSObject {
 
     private nonisolated static func configureSession(
         _ captureSession: AVCaptureSession,
-        movieOutput: AVCaptureMovieFileOutput
+        movieOutput: AVCaptureMovieFileOutput,
+        position: AVCaptureDevice.Position = .back
     ) throws {
         captureSession.beginConfiguration()
         defer { captureSession.commitConfiguration() }
 
         captureSession.sessionPreset = .high
 
-        // Prefer front camera for self-recording; fall back to any camera (Mac Catalyst).
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+        // Use requested camera position; fall back to any camera (Mac Catalyst).
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
                 ?? AVCaptureDevice.default(for: .video) else {
             throw RecordingError.cameraUnavailable
         }

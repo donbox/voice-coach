@@ -13,11 +13,12 @@ struct ExerciseCreationView: View {
     @State private var courseSession = ""
     @State private var pickerItem: PhotosPickerItem?
     @State private var selectedVideoURL: URL?
+    @State private var selectedAssetIdentifier: String?
     @State private var isLoading = false
     @State private var importError: String?
 
     private var canSave: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty && selectedVideoURL != nil
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && (selectedVideoURL != nil || selectedAssetIdentifier != nil)
     }
 
     var body: some View {
@@ -37,6 +38,9 @@ struct ExerciseCreationView: View {
                             Text("Loading video…")
                                 .foregroundStyle(.secondary)
                         }
+                    } else if selectedAssetIdentifier != nil {
+                        Label("Selected from Photos", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
                     } else if let url = selectedVideoURL {
                         Label(url.lastPathComponent, systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green)
@@ -88,7 +92,18 @@ struct ExerciseCreationView: View {
         isLoading = true
         importError = nil
         selectedVideoURL = nil
+        selectedAssetIdentifier = nil
 
+        // Prefer keeping the Photos asset identifier so the demo video
+        // roams across devices via iCloud Photos.
+        if let assetID = item.itemIdentifier,
+           PhotosLibraryService.shared.assetExists(assetID) {
+            selectedAssetIdentifier = assetID
+            isLoading = false
+            return
+        }
+
+        // Fallback: transfer the file locally
         Task {
             do {
                 guard let transferred = try await item.loadTransferable(type: VideoTransferable.self) else {
@@ -105,20 +120,35 @@ struct ExerciseCreationView: View {
     }
 
     private func saveExercise() {
-        guard let sourceURL = selectedVideoURL else { return }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
+        let trimmedCategory = category.trimmingCharacters(in: .whitespaces)
+        let trimmedSession = courseSession.trimmingCharacters(in: .whitespaces)
 
-        do {
-            let relativePath = try VideoStorageService.shared.importDemoVideo(from: sourceURL)
+        if let assetID = selectedAssetIdentifier {
+            // Photos-backed demo video — roams via iCloud Photos
             let exercise = Exercise(
-                title: title.trimmingCharacters(in: .whitespaces),
-                category: category.trimmingCharacters(in: .whitespaces),
-                courseSession: courseSession.trimmingCharacters(in: .whitespaces),
-                demoVideoRelativePath: relativePath
+                title: trimmedTitle,
+                category: trimmedCategory,
+                courseSession: trimmedSession,
+                demoPhotosAssetIdentifier: assetID
             )
             modelContext.insert(exercise)
             dismiss()
-        } catch {
-            importError = "Failed to import video: \(error.localizedDescription)"
+        } else if let sourceURL = selectedVideoURL {
+            // Fallback: copy file locally
+            do {
+                let relativePath = try VideoStorageService.shared.importDemoVideo(from: sourceURL)
+                let exercise = Exercise(
+                    title: trimmedTitle,
+                    category: trimmedCategory,
+                    courseSession: trimmedSession,
+                    demoVideoRelativePath: relativePath
+                )
+                modelContext.insert(exercise)
+                dismiss()
+            } catch {
+                importError = "Failed to import video: \(error.localizedDescription)"
+            }
         }
     }
 }

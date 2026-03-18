@@ -61,7 +61,14 @@ struct ExerciseListView: View {
     private func deleteExercise(_ exercise: Exercise) {
         Task { @MainActor in
             // Clean up demo video
-            try? VideoStorageService.shared.deleteVideo(at: exercise.demoVideoRelativePath)
+            if exercise.isDemoPhotosBackedVideo {
+                if !exercise.demoPhotosAssetIdentifier.isEmpty {
+                    let deleted = await PhotosLibraryService.shared.deleteAsset(exercise.demoPhotosAssetIdentifier)
+                    guard deleted else { return }
+                }
+            } else {
+                try? VideoStorageService.shared.deleteVideo(at: exercise.demoVideoRelativePath)
+            }
             // Clean up all attempt videos; abort if any Photos deletion is denied
             for attempt in exercise.attempts {
                 if attempt.isPhotosBackedVideo {

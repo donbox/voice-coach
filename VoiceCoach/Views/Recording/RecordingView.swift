@@ -33,8 +33,16 @@ struct RecordingView: View {
                         .font(.headline)
                         .foregroundStyle(.white)
                     Spacer()
-                    // Spacer for symmetry
-                    Color.clear.frame(width: 32, height: 32)
+                    Button {
+                        Task {
+                            try? await recorder.flipCamera()
+                        }
+                    } label: {
+                        Image(systemName: "camera.rotate.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white)
+                    }
+                    .disabled(recorder.isRecording)
                 }
                 .padding()
 

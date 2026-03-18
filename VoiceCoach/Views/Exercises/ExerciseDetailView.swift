@@ -107,7 +107,7 @@ struct ExerciseDetailView: View {
     @ViewBuilder
     private var videoArea: some View {
         let relativePath = selectedAttempt?.videoRelativePath ?? exercise.demoVideoRelativePath
-        let photosID = selectedAttempt?.photosAssetIdentifier
+        let photosID = selectedAttempt?.photosAssetIdentifier ?? (selectedAttempt == nil && exercise.isDemoPhotosBackedVideo ? exercise.demoPhotosAssetIdentifier : nil)
         ZStack(alignment: .bottom) {
             VideoPlayerView(
                 relativePath: relativePath,
