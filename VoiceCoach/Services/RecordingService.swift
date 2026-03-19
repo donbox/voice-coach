@@ -1,4 +1,5 @@
 @preconcurrency import AVFoundation
+import AVFAudio
 import UIKit
 
 @MainActor
@@ -50,11 +51,21 @@ final class RecordingService: NSObject {
         let captureSession = self.captureSession
         let movieOutput = self.movieOutput
         let position: AVCaptureDevice.Position = usingFrontCamera ? .front : .back
+        let preferredCameraID = StorageSettings.preferredCameraID
+        let preferredMicID = StorageSettings.preferredMicrophoneID
+        let echoCancellation = StorageSettings.echoCancellationEnabled
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async {
                 do {
-                    try RecordingService.configureSession(captureSession, movieOutput: movieOutput, position: position)
+                    RecordingService.configureAudioSession(echoCancellation: echoCancellation)
+                    try RecordingService.configureSession(
+                        captureSession,
+                        movieOutput: movieOutput,
+                        position: position,
+                        preferredCameraID: preferredCameraID,
+                        preferredMicrophoneID: preferredMicID
+                    )
                     continuation.resume()
                 } catch {
                     continuation.resume(throwing: error)
@@ -66,7 +77,7 @@ final class RecordingService: NSObject {
     func flipCamera() async throws {
         usingFrontCamera.toggle()
         let captureSession = self.captureSession
-        let movieOutput = self.movieOutput
+        // Flip always uses position-based selection, ignoring any preferred device.
         let position: AVCaptureDevice.Position = usingFrontCamera ? .front : .back
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -99,19 +110,50 @@ final class RecordingService: NSObject {
         }
     }
 
+    /// Configures AVAudioSession for echo cancellation when needed.
+    /// Returns true if configuration succeeded.
+    @discardableResult
+    private nonisolated static func configureAudioSession(echoCancellation: Bool) -> Bool {
+        let session = AVAudioSession.sharedInstance()
+        let options: AVAudioSession.CategoryOptions = [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP]
+        do {
+            if echoCancellation {
+                // voiceChat mode enables the system's acoustic echo cancellation.
+                try session.setCategory(.playAndRecord, mode: .voiceChat, options: options)
+            } else {
+                try session.setCategory(.playAndRecord, mode: .videoRecording, options: options)
+            }
+            try session.setActive(true)
+            return true
+        } catch {
+            print("[RecordingService] Failed to configure audio session: \(error.localizedDescription)")
+            return false
+        }
+    }
+
     private nonisolated static func configureSession(
         _ captureSession: AVCaptureSession,
         movieOutput: AVCaptureMovieFileOutput,
-        position: AVCaptureDevice.Position = .back
+        position: AVCaptureDevice.Position = .back,
+        preferredCameraID: String? = nil,
+        preferredMicrophoneID: String? = nil
     ) throws {
         captureSession.beginConfiguration()
         defer { captureSession.commitConfiguration() }
 
         captureSession.sessionPreset = .high
 
-        // Use requested camera position; fall back to any camera (Mac Catalyst).
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
-                ?? AVCaptureDevice.default(for: .video) else {
+        // Camera: prefer user-selected device, then position-based, then any available.
+        let camera: AVCaptureDevice? = {
+            if let id = preferredCameraID,
+               let device = AVCaptureDevice(uniqueID: id),
+               device.hasMediaType(.video) {
+                return device
+            }
+            return AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+                ?? AVCaptureDevice.default(for: .video)
+        }()
+        guard let camera else {
             throw RecordingError.cameraUnavailable
         }
         let videoInput = try AVCaptureDeviceInput(device: camera)
@@ -120,8 +162,16 @@ final class RecordingService: NSObject {
         }
         captureSession.addInput(videoInput)
 
-        // Microphone
-        guard let mic = AVCaptureDevice.default(for: .audio) else {
+        // Microphone: prefer user-selected device, then system default.
+        let mic: AVCaptureDevice? = {
+            if let id = preferredMicrophoneID,
+               let device = AVCaptureDevice(uniqueID: id),
+               device.hasMediaType(.audio) {
+                return device
+            }
+            return AVCaptureDevice.default(for: .audio)
+        }()
+        guard let mic else {
             throw RecordingError.microphoneUnavailable
         }
         let audioInput = try AVCaptureDeviceInput(device: mic)

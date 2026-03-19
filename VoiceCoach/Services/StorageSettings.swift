@@ -52,4 +52,21 @@ enum StorageSettings {
     static var savesToPhotos: Bool {
         mode != .local
     }
+
+    // MARK: - Device Preferences
+
+    static var preferredCameraID: String? {
+        get { defaults.string(forKey: "preferredCameraID") }
+        set { defaults.set(newValue, forKey: "preferredCameraID") }
+    }
+
+    static var preferredMicrophoneID: String? {
+        get { defaults.string(forKey: "preferredMicrophoneID") }
+        set { defaults.set(newValue, forKey: "preferredMicrophoneID") }
+    }
+
+    static var echoCancellationEnabled: Bool {
+        get { defaults.object(forKey: "echoCancellationEnabled") as? Bool ?? false }
+        set { defaults.set(newValue, forKey: "echoCancellationEnabled") }
+    }
 }
