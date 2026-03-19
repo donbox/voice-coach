@@ -87,8 +87,12 @@ struct SettingsView: View {
     }
 
     private func refreshDevices() {
+        var cameraTypes: [AVCaptureDevice.DeviceType] = [.builtInWideAngleCamera, .external]
+        #if !targetEnvironment(macCatalyst)
+        cameraTypes += [.builtInTrueDepthCamera, .builtInUltraWideCamera, .builtInTelephotoCamera]
+        #endif
         let cameraDiscovery = AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.builtInWideAngleCamera, .builtInTrueDepthCamera, .builtInUltraWideCamera, .builtInTelephotoCamera, .external],
+            deviceTypes: cameraTypes,
             mediaType: .video,
             position: .unspecified
         )
