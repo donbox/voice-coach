@@ -1,6 +1,12 @@
 import SwiftUI
 @preconcurrency import AVFoundation
 
+/// Lightweight wrapper so cameras and mics share the same Picker shape.
+private struct AudioDeviceInfo: Identifiable {
+    let id: String          // uniqueID or portUID
+    let name: String
+}
+
 struct SettingsView: View {
     @State private var storageMode: AttemptStorageMode = StorageSettings.mode
     @State private var albumName: String = StorageSettings.photosAlbumName
@@ -8,7 +14,7 @@ struct SettingsView: View {
     @State private var preferredMicrophoneID: String = StorageSettings.preferredMicrophoneID ?? ""
     @State private var echoCancellation: Bool = StorageSettings.echoCancellationEnabled
     @State private var cameras: [AVCaptureDevice] = []
-    @State private var microphones: [AVCaptureDevice] = []
+    @State private var microphones: [AudioDeviceInfo] = []
 
     var body: some View {
         Form {
@@ -47,8 +53,8 @@ struct SettingsView: View {
 
                 Picker("Microphone", selection: $preferredMicrophoneID) {
                     Text("Default").tag("")
-                    ForEach(microphones, id: \.uniqueID) { device in
-                        Text(device.localizedName).tag(device.uniqueID)
+                    ForEach(microphones) { mic in
+                        Text(mic.name).tag(mic.id)
                     }
                 }
             } header: {
@@ -98,25 +104,22 @@ struct SettingsView: View {
         )
         cameras = cameraDiscovery.devices
 
-        let micTypes: [AVCaptureDevice.DeviceType]
-        if #available(iOS 17.0, macCatalyst 17.0, *) {
-            micTypes = [.microphone, .external]
+        // Use AVAudioSession for mic enumeration — AVCaptureDevice.DiscoverySession
+        // doesn't reliably list external/USB mics on Mac Catalyst.
+        let audioSession = AVAudioSession.sharedInstance()
+        try? audioSession.setCategory(.playAndRecord)
+        if let inputs = audioSession.availableInputs {
+            microphones = inputs.map { AudioDeviceInfo(id: $0.uid, name: $0.portName) }
         } else {
-            micTypes = [.builtInMicrophone, .external]
+            microphones = []
         }
-        let micDiscovery = AVCaptureDevice.DiscoverySession(
-            deviceTypes: micTypes,
-            mediaType: .audio,
-            position: .unspecified
-        )
-        microphones = micDiscovery.devices
 
         // Clear stale selections if saved device is no longer available
         if !preferredCameraID.isEmpty && !cameras.contains(where: { $0.uniqueID == preferredCameraID }) {
             preferredCameraID = ""
             StorageSettings.preferredCameraID = nil
         }
-        if !preferredMicrophoneID.isEmpty && !microphones.contains(where: { $0.uniqueID == preferredMicrophoneID }) {
+        if !preferredMicrophoneID.isEmpty && !microphones.contains(where: { $0.id == preferredMicrophoneID }) {
             preferredMicrophoneID = ""
             StorageSettings.preferredMicrophoneID = nil
         }

@@ -58,7 +58,10 @@ final class RecordingService: NSObject {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async {
                 do {
-                    RecordingService.configureAudioSession(echoCancellation: echoCancellation)
+                    RecordingService.configureAudioSession(
+                        echoCancellation: echoCancellation,
+                        preferredMicrophoneID: preferredMicID
+                    )
                     try RecordingService.configureSession(
                         captureSession,
                         movieOutput: movieOutput,
@@ -110,19 +113,33 @@ final class RecordingService: NSObject {
         }
     }
 
-    /// Configures AVAudioSession for echo cancellation when needed.
+    /// Configures AVAudioSession for echo cancellation and preferred mic.
     /// Returns true if configuration succeeded.
     @discardableResult
-    private nonisolated static func configureAudioSession(echoCancellation: Bool) -> Bool {
+    private nonisolated static func configureAudioSession(
+        echoCancellation: Bool,
+        preferredMicrophoneID: String? = nil
+    ) -> Bool {
         let session = AVAudioSession.sharedInstance()
         let options: AVAudioSession.CategoryOptions = [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP]
         do {
             if echoCancellation {
-                // voiceChat mode enables the system's acoustic echo cancellation.
+                // voiceChat mode enables the system's acoustic echo cancellation
+                // and forces mono input, eliminating stereo channel delay from webcams.
                 try session.setCategory(.playAndRecord, mode: .voiceChat, options: options)
             } else {
                 try session.setCategory(.playAndRecord, mode: .videoRecording, options: options)
             }
+
+            // Select preferred input by matching port UID
+            if let micID = preferredMicrophoneID,
+               let inputs = session.availableInputs,
+               let preferred = inputs.first(where: { $0.uid == micID }) {
+                try session.setPreferredInput(preferred)
+            }
+
+            // Force mono input to prevent stereo channel timing skew from webcam mics.
+            try session.setPreferredInputNumberOfChannels(1)
             try session.setActive(true)
             return true
         } catch {
