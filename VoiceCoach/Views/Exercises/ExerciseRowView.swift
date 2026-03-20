@@ -15,7 +15,7 @@ struct ExerciseRowView: View {
                 if !exercise.courseSession.isEmpty {
                     Label(exercise.courseSession, systemImage: "calendar")
                 }
-                Label("\(exercise.attempts.count)", systemImage: "video")
+                Label("\((exercise.attempts ?? []).count)", systemImage: "video")
             }
             .font(.caption)
             .foregroundStyle(.secondary)

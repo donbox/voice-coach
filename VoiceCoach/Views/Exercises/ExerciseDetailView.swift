@@ -13,7 +13,7 @@ struct ExerciseDetailView: View {
     @State private var relinkAttempt: Attempt?
 
     private var sortedAttempts: [Attempt] {
-        exercise.attempts.sorted { a, b in
+        (exercise.attempts ?? []).sorted { a, b in
             sortNewestFirst ? a.recordedAt > b.recordedAt : a.recordedAt < b.recordedAt
         }
     }
@@ -217,7 +217,7 @@ struct ExerciseDetailView: View {
                     }
                 } header: {
                     HStack {
-                        Text("My Attempts (\(exercise.attempts.count))")
+                        Text("My Attempts (\((exercise.attempts ?? []).count))")
                         Spacer()
                         SortOrderPicker(newestFirst: $sortNewestFirst)
                     }
