@@ -34,6 +34,11 @@ struct ExerciseDetailView: View {
         .fullScreenCover(isPresented: $showingRecording) {
             RecordingView(exercise: exercise)
         }
+        .onDisappear {
+            // Dismiss the recording sheet if the user switches tabs
+            // while it's up — otherwise it becomes un-dismissable.
+            showingRecording = false
+        }
         .onChange(of: sortNewestFirst) { _, _ in selectedAttemptIndex = nil }
         .photosPicker(isPresented: Binding(
             get: { relinkAttempt != nil },

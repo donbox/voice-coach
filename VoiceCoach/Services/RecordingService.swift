@@ -1,6 +1,9 @@
 @preconcurrency import AVFoundation
 import AVFAudio
 import UIKit
+#if targetEnvironment(macCatalyst)
+import CoreAudio
+#endif
 
 @MainActor
 @Observable
@@ -58,6 +61,14 @@ final class RecordingService: NSObject {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             sessionQueue.async {
                 do {
+                    #if targetEnvironment(macCatalyst)
+                    // On Mac Catalyst, AVCaptureSession always uses the system
+                    // default audio input.  Change it via CoreAudio before
+                    // configuring the capture session.
+                    if let micID = preferredMicID {
+                        RecordingService.setSystemDefaultInputDevice(uid: micID)
+                    }
+                    #endif
                     RecordingService.configureAudioSession(
                         echoCancellation: echoCancellation,
                         preferredMicrophoneID: preferredMicID
@@ -228,7 +239,11 @@ final class RecordingService: NSObject {
         // Force mono audio to prevent stereo channel timing skew from webcam mics.
         if let audioConnection = movieOutput.connection(with: .audio) {
             movieOutput.setOutputSettings(
-                [AVNumberOfChannelsKey: 1],
+                [
+                    AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                    AVNumberOfChannelsKey: 1,
+                    AVSampleRateKey: 44100,
+                ],
                 for: audioConnection
             )
         }
@@ -342,6 +357,64 @@ extension RecordingService: AVCaptureFileOutputRecordingDelegate {
         }
     }
 }
+
+// MARK: - CoreAudio device routing (Mac Catalyst)
+
+#if targetEnvironment(macCatalyst)
+extension RecordingService {
+    /// Sets the macOS system default input device by CoreAudio UID.
+    /// On Mac Catalyst, AVCaptureSession always uses the system default,
+    /// so this is the only way to route a specific microphone.
+    @discardableResult
+    nonisolated static func setSystemDefaultInputDevice(uid: String) -> Bool {
+        // Enumerate all audio devices to find the one matching the UID.
+        var devicesAddr = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDevices,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(
+            AudioObjectID(kAudioObjectSystemObject), &devicesAddr, 0, nil, &size
+        ) == noErr, size > 0 else { return false }
+
+        let count = Int(size) / MemoryLayout<AudioDeviceID>.size
+        var deviceIDs = [AudioDeviceID](repeating: 0, count: count)
+        guard AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject), &devicesAddr, 0, nil, &size, &deviceIDs
+        ) == noErr else { return false }
+
+        for deviceID in deviceIDs {
+            var uidAddr = AudioObjectPropertyAddress(
+                mSelector: kAudioDevicePropertyDeviceUID,
+                mScope: kAudioObjectPropertyScopeGlobal,
+                mElement: kAudioObjectPropertyElementMain
+            )
+            var deviceUID: Unmanaged<CFString>?
+            var uidSize = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+            guard AudioObjectGetPropertyData(
+                deviceID, &uidAddr, 0, nil, &uidSize, &deviceUID
+            ) == noErr, let uidRef = deviceUID?.takeUnretainedValue() else { continue }
+
+            if (uidRef as String) == uid {
+                var defaultAddr = AudioObjectPropertyAddress(
+                    mSelector: kAudioHardwarePropertyDefaultInputDevice,
+                    mScope: kAudioObjectPropertyScopeGlobal,
+                    mElement: kAudioObjectPropertyElementMain
+                )
+                var mutableID = deviceID
+                return AudioObjectSetPropertyData(
+                    AudioObjectID(kAudioObjectSystemObject),
+                    &defaultAddr, 0, nil,
+                    UInt32(MemoryLayout<AudioDeviceID>.size),
+                    &mutableID
+                ) == noErr
+            }
+        }
+        return false
+    }
+}
+#endif
 
 enum RecordingError: LocalizedError {
     case permissionDenied

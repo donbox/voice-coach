@@ -10,6 +10,7 @@ struct VideoPlayerView: View {
     var onRelinkVideo: (() -> Void)? = nil
     @State private var player: AVPlayer?
     @State private var videoUnavailable = false
+    @State private var lastLoadedID: String?
 
     var body: some View {
         Group {
@@ -65,6 +66,14 @@ struct VideoPlayerView: View {
             }
         }
         .task(id: "\(relativePath)|\(photosAssetIdentifier ?? "")") {
+            let taskID = "\(relativePath)|\(photosAssetIdentifier ?? "")"
+            let isNewVideo = taskID != lastLoadedID
+            lastLoadedID = taskID
+
+            // Only reload the player when the video actually changed —
+            // not on tab-switch re-appearance.
+            guard isNewVideo else { return }
+
             videoUnavailable = false
             player?.pause()
             player = nil
