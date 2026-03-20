@@ -22,7 +22,7 @@ struct PlaylistListView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(playlist.name)
                                     .font(.headline)
-                                Text("\(playlist.exercises.count) exercises")
+                                Text("\((playlist.exercises ?? []).count) exercises")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

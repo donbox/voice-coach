@@ -44,7 +44,7 @@ struct ModelTests {
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Exercise>())
-        #expect(fetched[0].attempts.isEmpty)
+        #expect((fetched[0].attempts ?? []).isEmpty)
     }
 
     @Test func deleteExerciseCascadesToAttempts() throws {
@@ -55,7 +55,9 @@ struct ModelTests {
         context.insert(exercise)
 
         let attempt = Attempt(videoRelativePath: "attempts/test.mov", exercise: exercise)
-        exercise.attempts.append(attempt)
+        var attempts = exercise.attempts ?? []
+        attempts.append(attempt)
+        exercise.attempts = attempts
         context.insert(attempt)
         try context.save()
 
@@ -78,13 +80,15 @@ struct ModelTests {
 
         for i in 0..<5 {
             let attempt = Attempt(videoRelativePath: "attempts/\(i).mov", exercise: exercise)
-            exercise.attempts.append(attempt)
+            var attempts = exercise.attempts ?? []
+            attempts.append(attempt)
+            exercise.attempts = attempts
             context.insert(attempt)
         }
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Exercise>())
-        #expect(fetched[0].attempts.count == 5)
+        #expect((fetched[0].attempts ?? []).count == 5)
     }
 
     @Test func deleteOneAttemptLeavesOthers() throws {
@@ -96,17 +100,19 @@ struct ModelTests {
 
         for i in 0..<3 {
             let attempt = Attempt(videoRelativePath: "attempts/\(i).mov", exercise: exercise)
-            exercise.attempts.append(attempt)
+            var attempts = exercise.attempts ?? []
+            attempts.append(attempt)
+            exercise.attempts = attempts
             context.insert(attempt)
         }
         try context.save()
 
-        let toDelete = exercise.attempts[0]
+        let toDelete = (exercise.attempts ?? [])[0]
         context.delete(toDelete)
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Exercise>())
-        #expect(fetched[0].attempts.count == 2)
+        #expect((fetched[0].attempts ?? []).count == 2)
     }
 
     // MARK: - Attempt
@@ -152,7 +158,7 @@ struct ModelTests {
         let fetched = try context.fetch(FetchDescriptor<Playlist>())
         #expect(fetched.count == 1)
         #expect(fetched[0].name == "Morning Routine")
-        #expect(fetched[0].exercises.count == 2)
+        #expect((fetched[0].exercises ?? []).count == 2)
     }
 
     @Test func addExerciseToExistingPlaylist() throws {
@@ -165,12 +171,14 @@ struct ModelTests {
         context.insert(playlist)
         try context.save()
 
-        playlist.exercises.append(exercise)
+        var list = playlist.exercises ?? []
+        list.append(exercise)
+        playlist.exercises = list
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Playlist>())
-        #expect(fetched[0].exercises.count == 1)
-        #expect(fetched[0].exercises[0].title == "Warmup")
+        #expect((fetched[0].exercises ?? []).count == 1)
+        #expect((fetched[0].exercises ?? [])[0].title == "Warmup")
     }
 
     @Test func exerciseCanBelongToMultiplePlaylists() throws {
@@ -184,12 +192,16 @@ struct ModelTests {
         context.insert(playlist1)
         context.insert(playlist2)
 
-        playlist1.exercises.append(exercise)
-        playlist2.exercises.append(exercise)
+        var list1 = playlist1.exercises ?? []
+        list1.append(exercise)
+        playlist1.exercises = list1
+        var list2 = playlist2.exercises ?? []
+        list2.append(exercise)
+        playlist2.exercises = list2
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Exercise>())
-        #expect(fetched[0].playlists.count == 2)
+        #expect((fetched[0].playlists ?? []).count == 2)
     }
 
     @Test func deletePlaylistDoesNotDeleteExercises() throws {
@@ -220,6 +232,6 @@ struct ModelTests {
         try context.save()
 
         let fetched = try context.fetch(FetchDescriptor<Playlist>())
-        #expect(fetched[0].exercises.isEmpty)
+        #expect((fetched[0].exercises ?? []).isEmpty)
     }
 }

@@ -7,16 +7,16 @@ struct PlaylistDetailView: View {
 
     var body: some View {
         List {
-            if playlist.exercises.isEmpty {
+            if (playlist.exercises ?? []).isEmpty {
                 ContentUnavailableView(
                     "Empty Playlist",
                     systemImage: "music.note",
                     description: Text("Add exercises to build your routine.")
                 )
             } else {
-                ForEach(Array(playlist.exercises.enumerated()), id: \.element.id) { index, exercise in
+                ForEach(Array((playlist.exercises ?? []).enumerated()), id: \.element.id) { index, exercise in
                     NavigationLink {
-                        PlaylistExerciseDetailView(exercises: playlist.exercises, startIndex: index)
+                        PlaylistExerciseDetailView(exercises: playlist.exercises ?? [], startIndex: index)
                     } label: {
                         ExerciseRowView(exercise: exercise)
                     }
@@ -44,11 +44,15 @@ struct PlaylistDetailView: View {
     }
 
     private func removeExercises(at offsets: IndexSet) {
-        playlist.exercises.remove(atOffsets: offsets)
+        var list = playlist.exercises ?? []
+        list.remove(atOffsets: offsets)
+        playlist.exercises = list
     }
 
     private func moveExercises(from source: IndexSet, to destination: Int) {
-        playlist.exercises.move(fromOffsets: source, toOffset: destination)
+        var list = playlist.exercises ?? []
+        list.move(fromOffsets: source, toOffset: destination)
+        playlist.exercises = list
     }
 }
 
@@ -105,10 +109,12 @@ struct ExercisePickerView: View {
     var body: some View {
         NavigationStack {
             List(allExercises) { exercise in
-                let isInPlaylist = playlist.exercises.contains(where: { $0.id == exercise.id })
+                let isInPlaylist = (playlist.exercises ?? []).contains(where: { $0.id == exercise.id })
                 Button {
                     if !isInPlaylist {
-                        playlist.exercises.append(exercise)
+                        var list = playlist.exercises ?? []
+                        list.append(exercise)
+                        playlist.exercises = list
                     }
                 } label: {
                     HStack {

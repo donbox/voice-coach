@@ -20,10 +20,10 @@ final class Exercise {
     }
 
     @Relationship(deleteRule: .cascade, inverse: \Attempt.exercise)
-    var attempts: [Attempt] = []
+    var attempts: [Attempt]?
 
     @Relationship(inverse: \Playlist.exercises)
-    var playlists: [Playlist] = []
+    var playlists: [Playlist]?
 
     init(
         title: String,
@@ -39,7 +39,7 @@ final class Exercise {
         self.demoVideoRelativePath = demoVideoRelativePath
         self.demoPhotosAssetIdentifier = demoPhotosAssetIdentifier
         self.createdAt = Date()
-        self.attempts = []
-        self.playlists = []
+        self.attempts = nil
+        self.playlists = nil
     }
 }
