@@ -5,6 +5,7 @@ struct VideoPlayerView: View {
     let relativePath: String
     var photosAssetIdentifier: String? = nil
     var autoPlay: Bool = false
+    var isActive: Bool = true
     var onDeleteAttempt: (() -> Void)? = nil
     var onRelinkVideo: (() -> Void)? = nil
     @State private var player: AVPlayer?
@@ -87,6 +88,9 @@ struct VideoPlayerView: View {
                 player = newPlayer
                 if autoPlay { newPlayer.play() }
             }
+        }
+        .onChange(of: isActive) { _, active in
+            if !active { player?.pause() }
         }
         .onDisappear {
             player?.pause()

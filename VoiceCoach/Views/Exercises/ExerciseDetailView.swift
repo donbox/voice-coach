@@ -113,6 +113,7 @@ struct ExerciseDetailView: View {
                 relativePath: relativePath,
                 photosAssetIdentifier: photosID,
                 autoPlay: selectedAttempt != nil,
+                isActive: !showingRecording,
                 onDeleteAttempt: selectedAttempt.map { attempt in
                     { deleteAttempt(attempt) }
                 },

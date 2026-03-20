@@ -43,6 +43,7 @@ struct ExerciseListView: View {
         .navigationTitle("tenK")
         .navigationDestination(for: Exercise.self) { exercise in
             ExerciseDetailView(exercise: exercise)
+                .id(exercise.id)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

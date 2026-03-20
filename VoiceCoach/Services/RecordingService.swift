@@ -131,11 +131,15 @@ final class RecordingService: NSObject {
                 try session.setCategory(.playAndRecord, mode: .videoRecording, options: options)
             }
 
-            // Select preferred input by matching port UID
-            if let micID = preferredMicrophoneID,
-               let inputs = session.availableInputs,
-               let preferred = inputs.first(where: { $0.uid == micID }) {
-                try session.setPreferredInput(preferred)
+            // Select preferred input — the stored ID may be an AVCaptureDevice
+            // uniqueID or an AVAudioSession port UID, so try both.
+            if let micID = preferredMicrophoneID, let inputs = session.availableInputs {
+                if let preferred = inputs.first(where: { $0.uid == micID }) {
+                    try session.setPreferredInput(preferred)
+                } else if let device = AVCaptureDevice(uniqueID: micID),
+                          let preferred = inputs.first(where: { $0.portName == device.localizedName }) {
+                    try session.setPreferredInput(preferred)
+                }
             }
 
             // Force mono input to prevent stereo channel timing skew from webcam mics.
@@ -180,22 +184,40 @@ final class RecordingService: NSObject {
         captureSession.addInput(videoInput)
 
         // Microphone: prefer user-selected device, then system default.
+        // The stored ID may be a CoreAudio UID, AVCaptureDevice uniqueID,
+        // or AVAudioSession port UID, so try multiple lookup strategies.
         let mic: AVCaptureDevice? = {
-            if let id = preferredMicrophoneID,
-               let device = AVCaptureDevice(uniqueID: id),
-               device.hasMediaType(.audio) {
-                return device
+            if let id = preferredMicrophoneID {
+                // Direct uniqueID match (works for CoreAudio UIDs too).
+                if let device = AVCaptureDevice(uniqueID: id),
+                   device.hasMediaType(.audio) {
+                    return device
+                }
+                // Fallback: search all audio-capable devices by name match.
+                let discovery = AVCaptureDevice.DiscoverySession(
+                    deviceTypes: [.microphone, .external],
+                    mediaType: nil,
+                    position: .unspecified
+                )
+                if let device = discovery.devices.first(where: {
+                    $0.hasMediaType(.audio) && $0.uniqueID == id
+                }) {
+                    return device
+                }
             }
             return AVCaptureDevice.default(for: .audio)
         }()
         guard let mic else {
             throw RecordingError.microphoneUnavailable
         }
+        // If the selected mic is the same physical device as the camera,
+        // it was already added as a video input — just verify audio is routed.
         let audioInput = try AVCaptureDeviceInput(device: mic)
-        guard captureSession.canAddInput(audioInput) else {
+        if captureSession.canAddInput(audioInput) {
+            captureSession.addInput(audioInput)
+        } else if mic.uniqueID != camera.uniqueID {
             throw RecordingError.sessionConfigurationFailed
         }
-        captureSession.addInput(audioInput)
 
         // Movie output
         guard captureSession.canAddOutput(movieOutput) else {
@@ -203,15 +225,13 @@ final class RecordingService: NSObject {
         }
         captureSession.addOutput(movieOutput)
 
-        // Force mono audio on Mac Catalyst to prevent stereo channel timing skew.
-        #if targetEnvironment(macCatalyst)
+        // Force mono audio to prevent stereo channel timing skew from webcam mics.
         if let audioConnection = movieOutput.connection(with: .audio) {
             movieOutput.setOutputSettings(
                 [AVNumberOfChannelsKey: 1],
                 for: audioConnection
             )
         }
-        #endif
     }
 
     func startSession() {
